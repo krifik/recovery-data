@@ -2,22 +2,25 @@
 const Client = require("pg").Client;
 
 const fs = require("fs");
+
+// DB 1 that data exist and want to store to DB 2
 const dbConfig1 = {
-  user: "postgres",
-  host: "0.0.0.0",
+  user: process.env.PG1_USER,
+  host: process.env.PG1_HOST,
   // database: "djatiroto",
-  database: "medan",
-  password: "",
-  port: 5432, // default PostgreSQL port
+  database: PG1_DATABASE,
+  password: PG1_PASS,
+  port: PG1_PORT, // default PostgreSQL port
 };
 
+// DB 2 is DB to retrieve data from DB 1 and inserted it
 const dbConfig2 = {
-  user: "postgres",
-  host: "0.0.0.0",
-  // database: "pantinugroho",
-  database: "djatiroto",
-  password: "",
-  port: 5432, // default PostgreSQL port
+  user: process.env.PG2_USER,
+  host: process.env.PG2_HOST,
+  // database: "djatiroto",
+  database: PG2_DATABASE,
+  password: PG2_PASS,
+  port: PG2_PORT, // default PostgreSQL port
 };
 
 // const dbConfig1 = {
@@ -54,11 +57,11 @@ async function bridging(startDate, endDate) {
     resultRecovery = Promise.all(
       result1.rows.map(async (element) => {
         const eBridgeReceive = await client2.query("SELECT * FROM e_bridge_receive WHERE ono='" + element.ono + "' LIMIT 1");
-        const tPatientRegistration = await client1.query("SELECT * FROM t_patient_registration WHERE reg_num='" + element.lno + "' LIMIT 1");
-        let tPatientRegistrationItem = tPatientRegistration.rows[0];
         // insert e bridge receive
         element.created_at = new Date(element.created_at).toISOString();
-        if (eBridgeReceive.rowCount === 0 && tPatientRegistration.rowCount === 1) {
+        if (eBridgeReceive.rowCount === 0) {
+          const tPatientRegistration = await client1.query("SELECT * FROM t_patient_registration WHERE reg_num='" + element.lno + "' LIMIT 1");
+          let tPatientRegistrationItem = tPatientRegistration.rows[0];
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           if (tPatientOrder.rowCount > 0) {

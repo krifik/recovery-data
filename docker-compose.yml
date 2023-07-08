@@ -4,9 +4,5 @@ services:
     build: .
     ports:
       - 3000:3000
-    environment:
-      - PGHOST=db
-      - PGPORT=5432
-      - PGDATABASE=mydatabase
-      - PGUSER=myuser
-      - PGPASSWORD=mypassword
+    volumes:
+      - ./:/app/
