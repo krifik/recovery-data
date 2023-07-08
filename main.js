@@ -54,7 +54,7 @@ async function bridging(startDate, endDate) {
     console.log("Ambil data bridging");
     const result1 = await client1.query("SELECT * FROM e_bridge_receive WHERE created_at BETWEEN $1 AND $2", [startDate, endDate]);
     // client1.release(); // Release the client back to the pool
-
+    console.log("Jumlah dari DB 1: " + result1.rowCount);
     // const client2 = await pool2.connect();
     resultRecovery = Promise.all(
       result1.rows.map(async (element) => {
@@ -62,6 +62,9 @@ async function bridging(startDate, endDate) {
         // insert e bridge receive
         element.created_at = new Date(element.created_at).toISOString();
         if (eBridgeReceive.rowCount === 0) {
+          let counter = 0;
+          counter++;
+          console.log("Jumlah dari DB 2 yang gaada di DB 1: " + counter);
           const tPatientRegistration = await client1.query("SELECT * FROM t_patient_registration WHERE reg_num='" + element.lno + "' LIMIT 1");
           let tPatientRegistrationItem = tPatientRegistration.rows[0];
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
