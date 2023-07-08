@@ -4,41 +4,41 @@ const Client = require("pg").Client;
 
 const fs = require("fs");
 
-// DB 1 that data exist and want to store to DB 2
-// const dbConfig1 = {
-//   user: process.env.PG1_USER,
-//   host: process.env.PG1_HOST,
-//   // database: "djatiroto",
-//   database: process.env.PG1_DATABASE,
-//   password: process.env.PG1_PASS,
-//   port: process.env.PG1_PORT, // default PostgreSQL port
-// };
-
-// // DB 2 is DB to retrieve data from DB 1 and inserted it
-// const dbConfig2 = {
-//   user: process.env.PG2_USER,
-//   host: process.env.PG2_HOST,
-//   // database: "djatiroto",
-//   database: process.env.PG2_DATABASE,
-//   password: process.env.PG2_PASS,
-//   port: process.env.PG2_PORT, // default PostgreSQL port
-// };
-
+DB 1 that data exist and want to store to DB 2
 const dbConfig1 = {
-  user: "postgres",
-  host: "0.0.0.0",
-  database: "medan",
-  password: "p@ssw0rd",
-  port: 5432, // default PostgreSQL port
+  user: process.env.PG1_USER,
+  host: process.env.PG1_HOST,
+  // database: "djatiroto",
+  database: process.env.PG1_DATABASE,
+  password: process.env.PG1_PASS,
+  port: process.env.PG1_PORT, // default PostgreSQL port
 };
 
+// DB 2 is DB to retrieve data from DB 1 and inserted it
 const dbConfig2 = {
-  user: "postgres",
-  host: "0.0.0.0",
-  database: "medimas_fix",
-  password: "",
-  port: 5432, // default PostgreSQL port
+  user: process.env.PG2_USER,
+  host: process.env.PG2_HOST,
+  // database: "djatiroto",
+  database: process.env.PG2_DATABASE,
+  password: process.env.PG2_PASS,
+  port: process.env.PG2_PORT, // default PostgreSQL port
 };
+
+// const dbConfig1 = {
+//   user: "postgres",
+//   host: "0.0.0.0",
+//   database: "medan",
+//   password: "p@ssw0rd",
+//   port: 5432, // default PostgreSQL port
+// };
+
+// const dbConfig2 = {
+//   user: "postgres",
+//   host: "0.0.0.0",
+//   database: "medimas_fix",
+//   password: "",
+//   port: 5432, // default PostgreSQL port
+// };
 
 let startDate = process.env.START_DATE;
 let endDate = process.env.END_DATE;
