@@ -19,4 +19,4 @@ COPY . ./app
 # Expose a port (replace 3000 with the port your app listens on)
 
 # Define the command to run your application
-CMD [ "node", "main.js" ]
+CMD [ "node", "app/main.js" ]
