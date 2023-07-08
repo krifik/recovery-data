@@ -1,3 +1,4 @@
+require("dotenv").config();
 // const express = require("express");
 const Client = require("pg").Client;
 
@@ -8,9 +9,9 @@ const dbConfig1 = {
   user: process.env.PG1_USER,
   host: process.env.PG1_HOST,
   // database: "djatiroto",
-  database: PG1_DATABASE,
-  password: PG1_PASS,
-  port: PG1_PORT, // default PostgreSQL port
+  database: process.env.PG1_DATABASE,
+  password: process.env.PG1_PASS,
+  port: process.env.PG1_PORT, // default PostgreSQL port
 };
 
 // DB 2 is DB to retrieve data from DB 1 and inserted it
@@ -18,9 +19,9 @@ const dbConfig2 = {
   user: process.env.PG2_USER,
   host: process.env.PG2_HOST,
   // database: "djatiroto",
-  database: PG2_DATABASE,
-  password: PG2_PASS,
-  port: PG2_PORT, // default PostgreSQL port
+  database: process.env.PG2_DATABASE,
+  password: process.env.PG2_PASS,
+  port: process.env.PG2_PORT, // default PostgreSQL port
 };
 
 // const dbConfig1 = {
