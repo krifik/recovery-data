@@ -5,6 +5,7 @@ FROM node:14
 # WORKDIR /app
 
 RUN mkdir sql
+RUN chmod 777 sql
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
