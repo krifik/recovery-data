@@ -470,7 +470,7 @@ async function bridging(startDate, endDate) {
             contentTPE = contentTPE.join("");
             let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP;
 
-            fs.writeFile("BRIDGING-" + element.lno + ".sql", contentFull, (err) => {
+            fs.writeFile("./app/bridging/" + element.lno + ".sql", contentFull, (err) => {
               console.log("Writing SQL");
               if (err) {
                 console.error(err);
@@ -498,6 +498,7 @@ async function manual(startDate, endDate) {
       result1.rows.map(async (element) => {
         const tPatientRegistration = await client2.query("SELECT * FROM t_patient_registration WHERE reg_num='" + element.reg_num + "' LIMIT 1");
         // let tPatientRegistrationItem = tPatientRegistration.rows[0];
+        console.log(tPatientRegistration.rowCount);
         // insert e bridge receive
         element.created_at = new Date(element.created_at).toISOString();
         if (tPatientRegistration.rowCount === 0) {
@@ -902,7 +903,7 @@ async function manual(startDate, endDate) {
             contentTPE = contentTPE.join("");
             let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP;
             let newRegNum = element.reg_num.replace(/'/g, "");
-            fs.writeFile("MANUAL-" + newRegNum + ".sql", contentFull, (err) => {
+            fs.writeFile("./app/manual/" + newRegNum + ".sql", contentFull, (err) => {
               console.log("Writing SQL Manual");
 
               if (err) {
