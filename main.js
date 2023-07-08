@@ -4,7 +4,7 @@ const Client = require("pg").Client;
 
 const fs = require("fs");
 
-DB 1 that data exist and want to store to DB 2
+// DB 1 that data exist and want to store to DB 2
 const dbConfig1 = {
   user: process.env.PG1_USER,
   host: process.env.PG1_HOST,
