@@ -40,8 +40,8 @@ const dbConfig2 = {
 //   port: 5432, // default PostgreSQL port
 // };
 
-let startDate = "2022-01-01 00:00:00";
-let endDate = "2023-05-05 23:59:59";
+let startDate = process.env.START_DATE | "2022-01-01 00:00:00";
+let endDate = process.env.END_DATE | "2023-05-05 23:59:59";
 
 const client1 = new Client(dbConfig1);
 client1.connect();
@@ -463,7 +463,7 @@ async function bridging(startDate, endDate) {
             contentTPE = contentTPE.join("");
             let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP;
 
-            fs.writeFile(element.lno + ".sql", contentFull, (err) => {
+            fs.writeFile("./bridging/" + element.lno + ".sql", contentFull, (err) => {
               console.log("Writing SQL");
               if (err) {
                 console.error(err);
@@ -894,7 +894,7 @@ async function manual(startDate, endDate) {
             contentTPE = contentTPE.join("");
             let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP;
 
-            fs.writeFile(element.reg_num + ".sql", contentFull, (err) => {
+            fs.writeFile("./manual" + element.reg_num + ".sql", contentFull, (err) => {
               console.log("Writing SQL Manual");
 
               if (err) {
