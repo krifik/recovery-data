@@ -5,44 +5,45 @@ const Client = require("pg").Client;
 const fs = require("fs");
 
 // DB 1 that data exist and want to store to DB 2
-const dbConfig1 = {
-  user: process.env.PG1_USER,
-  host: process.env.PG1_HOST,
-  // database: "djatiroto",
-  database: process.env.PG1_DATABASE,
-  password: process.env.PG1_PASS,
-  port: process.env.PG1_PORT, // default PostgreSQL port
-};
-
-// DB 2 is DB to retrieve data from DB 1 and inserted it
-const dbConfig2 = {
-  user: process.env.PG2_USER,
-  host: process.env.PG2_HOST,
-  // database: "djatiroto",
-  database: process.env.PG2_DATABASE,
-  password: process.env.PG2_PASS,
-  port: process.env.PG2_PORT, // default PostgreSQL port
-};
-
 // const dbConfig1 = {
-//   user: "postgres",
-//   host: "182.168.7.83",
-//   database: "LIS_MARGONO",
-//   password: "p@ssw0rd",
-//   port: 5433, // default PostgreSQL port
+//   user: process.env.PG1_USER,
+//   host: process.env.PG1_HOST,
+//   // database: "djatiroto",
+//   database: process.env.PG1_DATABASE,
+//   password: process.env.PG1_PASS,
+//   port: process.env.PG1_PORT, // default PostgreSQL port
 // };
 
+// // DB 2 is DB to retrieve data from DB 1 and inserted it
 // const dbConfig2 = {
-//   user: "postgres",
-//   host: "182.168.7.93",
-//   database: "DEV_MARGONO",
-//   password: "",
-//   port: 5432, // default PostgreSQL port
+//   user: process.env.PG2_USER,
+//   host: process.env.PG2_HOST,
+//   // database: "djatiroto",
+//   database: process.env.PG2_DATABASE,
+//   password: process.env.PG2_PASS,
+//   port: process.env.PG2_PORT, // default PostgreSQL port
 // };
 
-let startDate = process.env.START_DATE | "2022-01-01 00:00:00";
-let endDate = process.env.END_DATE | "2023-05-05 23:59:59";
+const dbConfig1 = {
+  user: "postgres",
+  host: "0.0.0.0",
+  database: "medan",
+  password: "p@ssw0rd",
+  port: 5432, // default PostgreSQL port
+};
 
+const dbConfig2 = {
+  user: "postgres",
+  host: "0.0.0.0",
+  database: "medimas_fix",
+  password: "",
+  port: 5432, // default PostgreSQL port
+};
+
+let startDate = process.env.START_DATE;
+let endDate = process.env.END_DATE;
+console.log(startDate);
+console.log(endDate);
 const client1 = new Client(dbConfig1);
 client1.connect();
 const client2 = new Client(dbConfig2);
@@ -490,7 +491,8 @@ async function manual(startDate, endDate) {
     resultRecovery = await Promise.all(
       result1.rows.map(async (element) => {
         const tPatientRegistration = await client2.query("SELECT * FROM t_patient_registration WHERE reg_num='" + element.reg_num + "' LIMIT 1");
-        let tPatientRegistrationItem = tPatientRegistration.rows[0];
+        // let tPatientRegistrationItem = tPatientRegistration.rows[0];
+        console.log(tPatientRegistration.rowCount);
         // insert e bridge receive
         element.created_at = new Date(element.created_at).toISOString();
         if (tPatientRegistration.rowCount === 0) {
@@ -506,42 +508,43 @@ async function manual(startDate, endDate) {
             let tCommentSample = await client1.query("SELECT * FROM t_comment_sample WHERE uid_registration='" + element.uid + "'");
             let tPatientDiagnose = await client1.query("SELECT * FROM t_patient_diagnose WHERE uid_registration='" + element.uid + "'");
             let tPatientExamMicro = await client1.query("SELECT * FROM t_patient_exam_microbiology WHERE uid_registration='" + element.uid + "'");
-
             element.updated_at = new Date(element.updated_at).toISOString();
-            element.release_date = new Date(element.release_date).toISOString();
-            element.split_date = new Date(element.split_date).toISOString();
+            element.release_date = element.release_date ? new Date(element.release_date).toISOString() : null;
+            console.log(element.release_date);
+            // element.split_date = new Date(element.split_date).toISOString();
+            element.split_date = element.split_date ? new Date(element.split_date).toISOString() : null;
             let contentEBR = "INSERT INTO e_bridge_receive (ono, lno, text_result, text_order, release_date, validate, created_at, updated_at, split_date, source, result_message_id) VALUES('" + element.ono + "' ,'" + element.lno + "','" + element.text_result + "', '" + element.text_order + "' , '" + element.release_date + "','" + element.release_date + "','" + element.created_at + "','" + element.updated_at + "','" + element.split_date + "', '" + element.source + "', '" + element.result_message_id + "');";
 
-            tPatientRegistrationItem.created_at = `'${new Date(tPatientRegistrationItem.created_at).toISOString()}'`;
-            tPatientRegistrationItem.updated_at = `'${new Date(tPatientRegistrationItem.updated_at).toISOString()}'`;
-            tPatientRegistrationItem.cancelation_date = `'${new Date(tPatientRegistrationItem.cancelation_date).toISOString()}'`;
-            tPatientRegistrationItem.registration_date = `'${new Date(tPatientRegistrationItem.registration_date).toISOString()}'`;
+            element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+            element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+            element.cancelation_date = `'${new Date(element.cancelation_date).toISOString()}'`;
+            element.registration_date = `'${new Date(element.registration_date).toISOString()}'`;
 
-            tPatientRegistrationItem.patient_type = !tPatientRegistrationItem.patient_type ? tPatientRegistrationItem.patient_type : `'${tPatientRegistrationItem.patient_type}'`;
-            tPatientRegistrationItem.fast_note = tPatientRegistrationItem.fast_note ? `'${tPatientRegistrationItem.fast_note}'` : null;
-            // tPatientRegistrationItem.fast_note = !tPatientRegistrationItem.fast_note ? tPatientRegistrationItem.fast_note : `'${tPatientRegistrationItem.fast_note}'`;
-            tPatientRegistrationItem.mrn = !tPatientRegistrationItem.mrn ? tPatientRegistrationItem.mrn : `'${tPatientRegistrationItem.mrn}'`;
-            tPatientRegistrationItem.guarantor = !tPatientRegistrationItem.guarantor ? tPatientRegistrationItem.guarantor : `'${tPatientRegistrationItem.guarantor}'`;
-            tPatientRegistrationItem.members_number = !tPatientRegistrationItem.members_number ? tPatientRegistrationItem.members_number : `'${tPatientRegistrationItem.members_number}'`;
-            tPatientRegistrationItem.referral_type = !tPatientRegistrationItem.referral_type ? tPatientRegistrationItem.referral_type : `'${tPatientRegistrationItem.referral_type}'`;
-            tPatientRegistrationItem.uid_ward = !tPatientRegistrationItem.uid_ward ? tPatientRegistrationItem.uid_ward : `'${tPatientRegistrationItem.uid_ward}'`;
-            tPatientRegistrationItem.uid_class = !tPatientRegistrationItem.uid_class ? tPatientRegistrationItem.uid_class : `'${tPatientRegistrationItem.uid_class}'`;
-            tPatientRegistrationItem.uid_doctor_referral = !tPatientRegistrationItem.uid_doctor_referral ? tPatientRegistrationItem.uid_doctor_referral : `'${tPatientRegistrationItem.uid_doctor_referral}'`;
-            tPatientRegistrationItem.reg_num = !tPatientRegistrationItem.reg_num ? tPatientRegistrationItem.reg_num : `'${tPatientRegistrationItem.reg_num}'`;
-            tPatientRegistrationItem.created_by = !tPatientRegistrationItem.created_by ? tPatientRegistrationItem.created_by : `'${tPatientRegistrationItem.created_by}'`;
-            tPatientRegistrationItem.uid_updated_by = tPatientRegistrationItem.uid_updated_by = !tPatientRegistrationItem.uid_updated_by ? tPatientRegistrationItem.uid_updated_by : `'${tPatientRegistrationItem.uid_updated_by}'`;
-            tPatientRegistrationItem.uid = !tPatientRegistrationItem.uid ? tPatientRegistrationItem.uid : `'${tPatientRegistrationItem.uid}'`;
-            tPatientRegistrationItem.uid_profile = !tPatientRegistrationItem.uid_profile ? tPatientRegistrationItem.uid_profile : `'${tPatientRegistrationItem.uid_profile}'`;
-            tPatientRegistrationItem.uid_object = !tPatientRegistrationItem.uid_object ? tPatientRegistrationItem.uid_object : `'${tPatientRegistrationItem.uid_object}'`;
-            tPatientRegistrationItem.room_number = !tPatientRegistrationItem.room_number ? tPatientRegistrationItem.room_number : `'${tPatientRegistrationItem.room_number}'`;
-            tPatientRegistrationItem.source = !tPatientRegistrationItem.source ? tPatientRegistrationItem.source : `'${tPatientRegistrationItem.source}'`;
-            tPatientRegistrationItem.no_reg = !tPatientRegistrationItem.no_reg ? tPatientRegistrationItem.no_reg : `'${tPatientRegistrationItem.no_reg}'`;
-            tPatientRegistrationItem.sign_fast = !tPatientRegistrationItem.sign_fast ? tPatientRegistrationItem.sign_fast : `'${tPatientRegistrationItem.sign_fast}'`;
-            tPatientRegistrationItem.fast_note = !tPatientRegistrationItem.fast_note ? tPatientRegistrationItem.fast_note : `'${tPatientRegistrationItem.fast_note}'`;
-            tPatientRegistrationItem.uid_doctor_incharge = !tPatientRegistrationItem.uid_doctor_incharge ? tPatientRegistrationItem.uid_doctor_incharge : `'${tPatientRegistrationItem.uid_doctor_incharge}'`;
-            tPatientRegistrationItem.uid_facility_referral = !tPatientRegistrationItem.uid_facility_referral ? tPatientRegistrationItem.uid_facility_referral : `'${tPatientRegistrationItem.uid_facility_referral}'`;
-            tPatientRegistrationItem.uid_doctor = !tPatientRegistrationItem.uid_doctor ? tPatientRegistrationItem.uid_doctor : `'${tPatientRegistrationItem.uid_doctor}'`;
-            let contentTPR = "INSERT INTO t_patient_registration (mrn, patient_type, guarantor, members_number, referral_type, uid_ward, uid_class, uid_doctor_referral, uid_facility_referral, uid_doctor, is_cyto, reg_num, registration_date,created_by, uid_updated_by, uid, enabled, uid_profile, uid_object, created_at, updated_at, cancelation_remark, cancelation_date, is_bridge, room_number, source, no_reg, sign_fast, fast_note, is_pregnant, is_mcu, uid_doctor_incharge) VALUES(" + tPatientRegistrationItem.mrn + " ," + tPatientRegistrationItem.patient_type + "," + tPatientRegistrationItem.guarantor + ", " + tPatientRegistrationItem.members_number + " , " + tPatientRegistrationItem.referral_type + ", " + tPatientRegistrationItem.uid_ward + ", " + tPatientRegistrationItem.uid_class + ", " + tPatientRegistrationItem.uid_doctor_referral + ", " + tPatientRegistrationItem.uid_facility_referral + ", " + tPatientRegistrationItem.uid_doctor + ", " + tPatientRegistrationItem.is_cyto + ", " + tPatientRegistrationItem.reg_num + ", " + tPatientRegistrationItem.registration_date + ", " + tPatientRegistrationItem.created_by + ", " + tPatientRegistrationItem.uid_updated_by + ", " + tPatientRegistrationItem.uid + ", " + tPatientRegistrationItem.enabled + ", " + tPatientRegistrationItem.uid_profile + ", " + tPatientRegistrationItem.uid_object + ", " + tPatientRegistrationItem.created_at + ", " + tPatientRegistrationItem.updated_at + ", " + tPatientRegistrationItem.cancelation_remark + ", " + tPatientRegistrationItem.cancelation_date + ", " + tPatientRegistrationItem.is_bridge + ", " + tPatientRegistrationItem.room_number + ", " + tPatientRegistrationItem.source + ", " + tPatientRegistrationItem.no_reg + ", " + tPatientRegistrationItem.sign_fast + ", " + tPatientRegistrationItem.fast_note + ", " + tPatientRegistrationItem.is_pregnant + ", " + tPatientRegistrationItem.is_mcu + ", " + tPatientRegistrationItem.uid_doctor_incharge + ");";
+            element.patient_type = !element.patient_type ? element.patient_type : `'${element.patient_type}'`;
+            element.fast_note = element.fast_note ? `'${element.fast_note}'` : null;
+            // element.fast_note = !element.fast_note ? element.fast_note : `'${element.fast_note}'`;
+            element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
+            element.guarantor = !element.guarantor ? element.guarantor : `'${element.guarantor}'`;
+            element.members_number = !element.members_number ? element.members_number : `'${element.members_number}'`;
+            element.referral_type = !element.referral_type ? element.referral_type : `'${element.referral_type}'`;
+            element.uid_ward = !element.uid_ward ? element.uid_ward : `'${element.uid_ward}'`;
+            element.uid_class = !element.uid_class ? element.uid_class : `'${element.uid_class}'`;
+            element.uid_doctor_referral = !element.uid_doctor_referral ? element.uid_doctor_referral : `'${element.uid_doctor_referral}'`;
+            element.reg_num = !element.reg_num ? element.reg_num : `'${element.reg_num}'`;
+            element.created_by = !element.created_by ? element.created_by : `'${element.created_by}'`;
+            element.uid_updated_by = element.uid_updated_by = !element.uid_updated_by ? element.uid_updated_by : `'${element.uid_updated_by}'`;
+            element.uid = !element.uid ? element.uid : `'${element.uid}'`;
+            element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
+            element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
+            element.room_number = !element.room_number ? element.room_number : `'${element.room_number}'`;
+            element.source = !element.source ? element.source : `'${element.source}'`;
+            element.no_reg = !element.no_reg ? element.no_reg : `'${element.no_reg}'`;
+            element.sign_fast = !element.sign_fast ? element.sign_fast : `'${element.sign_fast}'`;
+            element.fast_note = !element.fast_note ? element.fast_note : `'${element.fast_note}'`;
+            element.uid_doctor_incharge = !element.uid_doctor_incharge ? element.uid_doctor_incharge : `'${element.uid_doctor_incharge}'`;
+            element.uid_facility_referral = !element.uid_facility_referral ? element.uid_facility_referral : `'${element.uid_facility_referral}'`;
+            element.uid_doctor = !element.uid_doctor ? element.uid_doctor : `'${element.uid_doctor}'`;
+            let contentTPR = "INSERT INTO t_patient_registration (mrn, patient_type, guarantor, members_number, referral_type, uid_ward, uid_class, uid_doctor_referral, uid_facility_referral, uid_doctor, is_cyto, reg_num, registration_date,created_by, uid_updated_by, uid, enabled, uid_profile, uid_object, created_at, updated_at, cancelation_remark, cancelation_date, is_bridge, room_number, source, no_reg, sign_fast, fast_note, is_pregnant, is_mcu, uid_doctor_incharge) VALUES(" + element.mrn + " ," + element.patient_type + "," + element.guarantor + ", " + element.members_number + " , " + element.referral_type + ", " + element.uid_ward + ", " + element.uid_class + ", " + element.uid_doctor_referral + ", " + element.uid_facility_referral + ", " + element.uid_doctor + ", " + element.is_cyto + ", " + element.reg_num + ", " + element.registration_date + ", " + element.created_by + ", " + element.uid_updated_by + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.cancelation_remark + ", " + element.cancelation_date + ", " + element.is_bridge + ", " + element.room_number + ", " + element.source + ", " + element.no_reg + ", " + element.sign_fast + ", " + element.fast_note + ", " + element.is_pregnant + ", " + element.is_mcu + ", " + element.uid_doctor_incharge + ");";
 
             // t patient order
             let contentTPO = tPatientOrder.rows.map((element) => {
@@ -893,8 +896,8 @@ async function manual(startDate, endDate) {
             contentTPP = contentTPP ? contentTPP : "";
             contentTPE = contentTPE.join("");
             let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP;
-
-            fs.writeFile("./manual" + element.reg_num + ".sql", contentFull, (err) => {
+            let newRegNum = element.reg_num.replace(/'/g, "");
+            fs.writeFile("./manual/" + newRegNum + ".sql", contentFull, (err) => {
               console.log("Writing SQL Manual");
 
               if (err) {
