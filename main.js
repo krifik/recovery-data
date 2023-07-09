@@ -74,7 +74,7 @@ async function bridging(startDate, endDate) {
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           if (tPatientOrder.rowCount > 0) {
             const tPatientRegistrationC2 = await client2.query("SELECT * FROM t_patient_registration WHERE reg_num='" + tPatientRegistrationItem.reg_num + "' LIMIT 1");
-            if (tPatientRegistrationC2.rowCount === 0) {
+            if (tPatientRegistrationC2.rowCount > 0) {
               let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + tPatientRegistrationC2.rows[0].mrn + "'");
               let contentTP = "";
               if (tPatient.rowCount === 0) {
