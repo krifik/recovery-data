@@ -73,7 +73,8 @@ async function bridging(startDate, endDate) {
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           if (tPatientOrder.rowCount > 0) {
-            let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + tPatientRegistrationItem.mrn + "'");
+            const tPatientRegistrationC2 = await client2.query("SELECT * FROM t_patient_registration WHERE reg_num='" + element.lno + "' LIMIT 1");
+            let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + tPatientRegistrationC2.rows[0].mrn + "'");
             let contentTP = "";
             if (tPatient.rowCount === 0) {
               tPatient.rows[0].created_at = `'${new Date(tPatient.rows[0].created_at).toISOString()}'`;
@@ -569,7 +570,7 @@ async function manual(startDate, endDate) {
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + element.uid + "'");
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + element.uid + "'");
           if (tPatientOrder.rowCount > 0) {
-            let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + element.mrn + "'");
+            let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + tPatientRegistration.rows[0].mrn + "'");
             let contentTP = "";
             if (tPatient.rowCount === 0) {
               tPatient.rows[0].created_at = `'${new Date(tPatient.rows[0].created_at).toISOString()}'`;
