@@ -76,7 +76,24 @@ async function bridging(startDate, endDate) {
             let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + tPatientRegistrationItem.mrn + "'");
             let contentTP = "";
             if (tPatient.rowCount === 0) {
-              contentTP = `INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES("${tPatient.ono}", "${tPatient.lno}", "${tPatient.text_result}", "${tPatient.text_order}", "${tPatient.release_date}", "${tPatient.release_date}", "${tPatient.created_at}", "${tPatient.updated_at}", "${tPatient.split_date}", "${tPatient.source}", "${tPatient.result_message_id}");`;
+              tPatient.rows[0].created_at = `'${new Date(tPatient.rows[0].created_at).toISOString()}'`;
+              tPatient.rows[0].updated_at = `'${new Date(tPatient.rows[0].updated_at).toISOString()}'`;
+              tPatient.rows[0].membership_date = `'${new Date(tPatient.rows[0].membership_date).toISOString()}'`;
+              tPatient.rows[0].dob = `'${new Date(tPatient.rows[0].dob).toISOString()}'`;
+
+              tPatient.rows[0].mrn = tPatient.rows[0].mrn ? `'${tPatient.rows[0].mrn}'` : tPatient.rows[0].mrn;
+              tPatient.rows[0].name = tPatient.rows[0].name ? `'${tPatient.rows[0].name}'` : tPatient.rows[0].name;
+              tPatient.rows[0].gender = tPatient.rows[0].gender ? `'${tPatient.rows[0].gender}'` : tPatient.rows[0].gender;
+              tPatient.rows[0].address = tPatient.rows[0].address ? `'${tPatient.rows[0].address}'` : tPatient.rows[0].address;
+              tPatient.rows[0].phone = tPatient.rows[0].phone ? `'${tPatient.rows[0].phone}'` : tPatient.rows[0].phone;
+              tPatient.rows[0].email = tPatient.rows[0].email ? `'${tPatient.rows[0].email}'` : tPatient.rows[0].email;
+              tPatient.rows[0].pob = tPatient.rows[0].pob ? `'${tPatient.rows[0].pob}'` : tPatient.rows[0].pob;
+              tPatient.rows[0].uid = tPatient.rows[0].uid ? `'${tPatient.rows[0].uid}'` : tPatient.rows[0].uid;
+              tPatient.rows[0].source = tPatient.rows[0].source ? `'${tPatient.rows[0].source}'` : tPatient.rows[0].source;
+              tPatient.rows[0].uid_profile = tPatient.rows[0].uid_profile ? `'${tPatient.rows[0].uid_profile}'` : tPatient.rows[0].uid_profile;
+              tPatient.rows[0].uid_object = tPatient.rows[0].uid_object ? `'${tPatient.rows[0].uid_object}'` : tPatient.rows[0].uid_object;
+              tPatient.rows[0].nik = tPatient.rows[0].nik ? `'${tPatient.rows[0].nik}'` : tPatient.rows[0].nik;
+              contentTP = `INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES("${tPatient.rows[0].mrn}", "${tPatient.rows[0].name}", "${tPatient.rows[0].gender}", "${tPatient.rows[0].dob}", "${tPatient.rows[0].address}", "${tPatient.rows[0].phone}", "${tPatient.rows[0].email}", "${tPatient.rows[0].membership_date}", "${tPatient.rows[0].pob}", "${tPatient.rows[0].uid}", "${tPatient.rows[0].enabled}" , "${tPatient.rows[0].source}", "${tPatient.rows[0].uid_profile}", "${tPatient.rows[0].uid_object}", "${tPatient.rows[0].nik}");`;
             }
             let tHistoryApproveSample = await client1.query("SELECT * FROM t_history_approve_sample WHERE reg_num='" + tPatientRegistrationItem.reg_num + "'");
             let tPatientSample = await client1.query("SELECT * FROM t_patient_sample WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
@@ -553,7 +570,24 @@ async function manual(startDate, endDate) {
             let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + element.mrn + "'");
             let contentTP = "";
             if (tPatient.rowCount === 0) {
-              contentTP = `INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES("${tPatient.ono}", "${tPatient.lno}", "${tPatient.text_result}", "${tPatient.text_order}", "${tPatient.release_date}", "${tPatient.release_date}", "${tPatient.created_at}", "${tPatient.updated_at}", "${tPatient.split_date}", "${tPatient.source}", "${tPatient.result_message_id}");`;
+              tPatient.rows[0].created_at = `'${new Date(tPatient.rows[0].created_at).toISOString()}'`;
+              tPatient.rows[0].updated_at = `'${new Date(tPatient.rows[0].updated_at).toISOString()}'`;
+              tPatient.rows[0].membership_date = `'${new Date(tPatient.rows[0].membership_date).toISOString()}'`;
+              tPatient.rows[0].dob = `'${new Date(tPatient.rows[0].dob).toISOString()}'`;
+
+              tPatient.rows[0].mrn = tPatient.rows[0].mrn ? `'${tPatient.rows[0].mrn}'` : tPatient.rows[0].mrn;
+              tPatient.rows[0].name = tPatient.rows[0].name ? `'${tPatient.rows[0].name}'` : tPatient.rows[0].name;
+              tPatient.rows[0].gender = tPatient.rows[0].gender ? `'${tPatient.rows[0].gender}'` : tPatient.rows[0].gender;
+              tPatient.rows[0].address = tPatient.rows[0].address ? `'${tPatient.rows[0].address}'` : tPatient.rows[0].address;
+              tPatient.rows[0].phone = tPatient.rows[0].phone ? `'${tPatient.rows[0].phone}'` : tPatient.rows[0].phone;
+              tPatient.rows[0].email = tPatient.rows[0].email ? `'${tPatient.rows[0].email}'` : tPatient.rows[0].email;
+              tPatient.rows[0].pob = tPatient.rows[0].pob ? `'${tPatient.rows[0].pob}'` : tPatient.rows[0].pob;
+              tPatient.rows[0].uid = tPatient.rows[0].uid ? `'${tPatient.rows[0].uid}'` : tPatient.rows[0].uid;
+              tPatient.rows[0].source = tPatient.rows[0].source ? `'${tPatient.rows[0].source}'` : tPatient.rows[0].source;
+              tPatient.rows[0].uid_profile = tPatient.rows[0].uid_profile ? `'${tPatient.rows[0].uid_profile}'` : tPatient.rows[0].uid_profile;
+              tPatient.rows[0].uid_object = tPatient.rows[0].uid_object ? `'${tPatient.rows[0].uid_object}'` : tPatient.rows[0].uid_object;
+              tPatient.rows[0].nik = tPatient.rows[0].nik ? `'${tPatient.rows[0].nik}'` : tPatient.rows[0].nik;
+              contentTP = `INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES("${tPatient.rows[0].mrn}", "${tPatient.rows[0].name}", "${tPatient.rows[0].gender}", "${tPatient.rows[0].dob}", "${tPatient.rows[0].address}", "${tPatient.rows[0].phone}", "${tPatient.rows[0].email}", "${tPatient.rows[0].membership_date}", "${tPatient.rows[0].pob}", "${tPatient.rows[0].uid}", "${tPatient.rows[0].enabled}" , "${tPatient.rows[0].source}", "${tPatient.rows[0].uid_profile}", "${tPatient.rows[0].uid_object}", "${tPatient.rows[0].nik}");`;
             }
             let tPatientSample = await client1.query("SELECT * FROM t_patient_sample WHERE uid_registration='" + element.uid + "'");
             let tPatientSampleSpeciment = await client1.query("SELECT * FROM t_patient_sample_speciment WHERE uid_registration='" + element.uid + "'");
