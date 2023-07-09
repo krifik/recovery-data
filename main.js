@@ -573,8 +573,8 @@ async function manual(startDate, endDate) {
         if (tPatientRegistration.rowCount === 0) {
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + element.uid + "'");
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + element.uid + "'");
-          let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + tPatientOrder.rows[0].mrn + "'");
-          let tPatientC2 = await client2.query("SELECT * FROM t_patient WHERE mrn='" + tPatientOrder.rows[0].mrn + "'");
+          let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + element.mrn + "'");
+          let tPatientC2 = await client2.query("SELECT * FROM t_patient WHERE mrn='" + element.mrn + "'");
           if (tPatientOrder.rowCount > 0) {
             let contentTP = "";
             if (tPatientC2.rowCount === 0) {
