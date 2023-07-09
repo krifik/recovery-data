@@ -1,7 +1,7 @@
 require("dotenv").config();
 // const express = require("express");
 const Client = require("pg").Client;
-const format = require("pg-format");
+// const format = require("pg-format");
 
 const fs = require("fs");
 let dbConfig1;
