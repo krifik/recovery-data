@@ -73,6 +73,11 @@ async function bridging(startDate, endDate) {
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           if (tPatientOrder.rowCount > 0) {
+            let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + tPatientRegistrationItem.mrn + "'");
+            let contentTP = "";
+            if (tPatient.rowCount === 0) {
+              contentTP = `INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES("${tPatient.ono}", "${tPatient.lno}", "${tPatient.text_result}", "${tPatient.text_order}", "${tPatient.release_date}", "${tPatient.release_date}", "${tPatient.created_at}", "${tPatient.updated_at}", "${tPatient.split_date}", "${tPatient.source}", "${tPatient.result_message_id}");`;
+            }
             let tHistoryApproveSample = await client1.query("SELECT * FROM t_history_approve_sample WHERE reg_num='" + tPatientRegistrationItem.reg_num + "'");
             let tPatientSample = await client1.query("SELECT * FROM t_patient_sample WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
             let tPatientSampleSpeciment = await client1.query("SELECT * FROM t_patient_sample_speciment WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
@@ -509,7 +514,7 @@ async function bridging(startDate, endDate) {
             contentTPE = contentTPE.join("");
 
             contentTHAS = contentTHAS ? contentTHAS : "";
-            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS;
+            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS + "\n" + contentTP;
 
             fs.writeFile("./app/bridging/" + element.lno + ".sql", contentFull, (err) => {
               console.log("Writing SQL");
@@ -539,13 +544,17 @@ async function manual(startDate, endDate) {
       result1.rows.map(async (element) => {
         const tPatientRegistration = await client2.query("SELECT * FROM t_patient_registration WHERE reg_num='" + element.reg_num + "' LIMIT 1");
         // let tPatientRegistrationItem = tPatientRegistration.rows[0];
-        console.log(tPatientRegistration.rowCount);
         // insert e bridge receive
         element.created_at = new Date(element.created_at).toISOString();
         if (tPatientRegistration.rowCount === 0) {
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + element.uid + "'");
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + element.uid + "'");
           if (tPatientOrder.rowCount > 0) {
+            let tPatient = await client1.query("SELECT * FROM t_patient WHERE mrn='" + element.mrn + "'");
+            let contentTP = "";
+            if (tPatient.rowCount === 0) {
+              contentTP = `INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES("${tPatient.ono}", "${tPatient.lno}", "${tPatient.text_result}", "${tPatient.text_order}", "${tPatient.release_date}", "${tPatient.release_date}", "${tPatient.created_at}", "${tPatient.updated_at}", "${tPatient.split_date}", "${tPatient.source}", "${tPatient.result_message_id}");`;
+            }
             let tPatientSample = await client1.query("SELECT * FROM t_patient_sample WHERE uid_registration='" + element.uid + "'");
             let tPatientSampleSpeciment = await client1.query("SELECT * FROM t_patient_sample_speciment WHERE uid_registration='" + element.uid + "'");
             let tPatientPayment = await client1.query("SELECT * FROM t_patient_payment WHERE uid_registration='" + element.uid + "'");
@@ -984,7 +993,7 @@ async function manual(startDate, endDate) {
             contentTPE = contentTPE.join("");
 
             contentTPS = contentTPS ? contentTPS : "";
-            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS;
+            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS + "\n" + contentTP;
             let newRegNum = element.reg_num.replace(/'/g, "");
             fs.writeFile("./app/manual/" + newRegNum + ".sql", contentFull, (err) => {
               console.log("Writing SQL Manual");
