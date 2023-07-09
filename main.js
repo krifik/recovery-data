@@ -1,6 +1,7 @@
 require("dotenv").config();
 // const express = require("express");
 const Client = require("pg").Client;
+const format = require("pg-format");
 
 const fs = require("fs");
 let dbConfig1;
@@ -15,6 +16,10 @@ if (!process.env.DEBUG) {
     password: process.env.PG1_PASS,
     port: process.env.PG1_PORT, // default PostgreSQL port
   };
+
+  function escapeHTML(html) {
+    return html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
 
   // DB 2 is DB to retrieve data from DB 1 and inserted it
   dbConfig2 = {
@@ -115,7 +120,7 @@ async function bridging(startDate, endDate) {
             element.updated_at = new Date(element.updated_at).toISOString();
             element.release_date = new Date(element.release_date).toISOString();
             element.split_date = new Date(element.split_date).toISOString();
-            let contentEBR = "INSERT INTO e_bridge_receive (ono, lno, text_result, text_order, release_date, validate, created_at, updated_at, split_date, source, result_message_id) VALUES('" + element.ono + "' ,'" + element.lno + "','" + element.text_result + "', '" + element.text_order + "' , '" + element.release_date + "','" + element.release_date + "','" + element.created_at + "','" + element.updated_at + "','" + element.split_date + "', '" + element.source + "', '" + element.result_message_id + "');";
+            let contentEBR = format("INSERT INTO e_bridge_receive (ono, lno, text_result, text_order, release_date, validate, created_at, updated_at, split_date, source, result_message_id) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);", element.ono, element.lno, JSON.stringify(element.text_result), JSON.stringify(element.text_order), element.release_date, element.release_date, element.created_at, element.updated_at, element.split_date, element.source, element.result_message_id);
 
             tPatientRegistrationItem.created_at = `'${new Date(tPatientRegistrationItem.created_at).toISOString()}'`;
             tPatientRegistrationItem.updated_at = `'${new Date(tPatientRegistrationItem.updated_at).toISOString()}'`;
@@ -339,9 +344,10 @@ async function bridging(startDate, endDate) {
                 element.uid_parent = element.uid_parent ? `'${element.uid_parent}'` : element.uid_parent;
                 element.uid_nilai_normal = element.uid_nilai_normal ? `'${element.uid_nilai_normal}'` : element.uid_nilai_normal;
                 element.role_text = element.role_text ? `'${element.role_text}'` : element.role_text;
+                element.sign = element.sign ? `'${element.sign}'` : element.sign;
                 element.print_date = `'${new Date(element.print_date).toISOString()}'`;
 
-                examContent = "INSERT INTO t_patient_examination (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, print_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, flag, pending_date, pending_by, uid_acc_by, uid_created_by, uid_action_by, uid_package, uid_panel, uid_parent, uid_nilai_normal, uid, enabled, uid_profile, uid_object, created_at, updated_at, approve_mobile, uid_rolebase, role_text, sign, id_order, is_duplo) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + ", " + element.value_string + ", " + element.value_memo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.print_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.flag + ", " + element.pending_date + ", " + element.pending_by + ", " + element.uid_acc_by + ", " + element.uid_created_by + ", " + element.uid_action_by + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.uid_nilai_normal + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + "," + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.uid_rolebase + "," + element.role_text + "," + element.sign + ", " + element.id_order + "," + element.is_duplo + ");\n";
+                examContent = format("INSERT INTO t_patient_examination (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, print_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, flag, pending_date, pending_by, uid_acc_by, uid_created_by, uid_action_by, uid_package, uid_panel, uid_parent, uid_nilai_normal, uid, enabled, uid_profile, uid_object, created_at, updated_at, approve_mobile, uid_rolebase, role_text, sign, id_order, is_duplo) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);", element.mrn, element.uid_registration, element.uid_test, element.value, element.value_string, escapeHTML(element.value_memo), element.is_verify, element.verify_date, element.print_date, element.uid_verify_by, element.uid_instrument, element.is_acc, element.acc_date, element.is_edit, element.flag, element.pending_date, element.pending_by, element.uid_acc_by, element.uid_created_by, element.uid_action_by, element.uid_package, element.uid_panel, element.uid_parent, element.uid_nilai_normal, element.uid, element.enabled, element.uid_profile, element.uid_object, element.created_at, element.updated_at, element.approve_mobile, element.uid_rolebase, element.role_text, element.sign, element.id_order, element.is_duplo);
 
                 if (tPatientExaminationCritical.rowCount > 0) {
                   tPatientExaminationCritical.rows[0].remark = tPatientExaminationCritical.rows[0].remark ? `'${tPatientExaminationCritical.rows[0].remark}'` : tPatientExaminationCritical.rows[0].remark;
@@ -373,8 +379,9 @@ async function bridging(startDate, endDate) {
                   tCommentTest.rows[0].uid_comment_by = tCommentTest.rows[0].uid_comment_by ? `${tCommentTest.rows[0].uid_comment_by}` : tCommentTest.rows[0].uid_comment_by;
                   tCommentTest.rows[0].created_at = tCommentTest.rows[0].created_at ? `'${new Date(tCommentTest.rows[0].created_at).toISOString()}'` : tCommentTest.rows[0].created_at;
                   tCommentTest.rows[0].updated_at = tCommentTest.rows[0].updated_at ? `'${new Date(tCommentTest.rows[0].updated_at).toISOString()}'` : tCommentTest.rows[0].updated_at;
+                  tCommentTest.rows[0].status_date = tCommentTest.rows[0].status_date ? `'${new Date(tCommentTest.rows[0].status_date).toISOString()}'` : tCommentTest.rows[0].status_date;
 
-                  examContent += "INSERT INTO t_comment_test (uid_examination, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + tCommentTest.rows[0].uid_examination + ", " + tCommentTest.rows[0].uid + ", " + tCommentTest.rows[0].comment + ", " + tCommentTest.rows[0].uid_comment_by + "," + tCommentTest.rows[0].status + ", " + tCommentTest.rows[0].status_by + ", " + tCommentTest.rows[0].status_date + ", " + tCommentTest.rows[0].enabled + ", " + tCommentTest.rows[0].uid_profile + ", " + tCommentTest.rows[0].uid_object + ", " + tCommentTest.rows[0].created_at + ", " + tCommentTest.rows[0].updated_at + ");\n";
+                  examContent += format("INSERT INTO t_comment_test (uid_examination, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);\n", tCommentTest.rows[0].uid_examination, tCommentTest.rows[0].uid, escapeHTML(tCommentTest.rows[0].comment), tCommentTest.rows[0].uid_comment_by, tCommentTest.rows[0].status, tCommentTest.rows[0].status_by, tCommentTest.rows[0].status_date, tCommentTest.rows[0].enabled, tCommentTest.rows[0].uid_profile, tCommentTest.rows[0].uid_object, tCommentTest.rows[0].created_at, tCommentTest.rows[0].updated_at);
                 }
 
                 if (tHistoryApprove.rowCount > 0) {
@@ -421,7 +428,6 @@ async function bridging(startDate, endDate) {
             contentTPE[0] = contentTPE[0] ? contentTPE[0] : "";
             let contentTCS = tCommentSample.rows
               .map((element) => {
-                // console.log("ADA", contentTPR);
                 if (!element) {
                   return "";
                 }
@@ -433,14 +439,14 @@ async function bridging(startDate, endDate) {
                 element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
                 element.uid = element.uid ? `'${element.uid}'` : element.uid;
                 element.uid_comment_by = element.uid_comment_by ? `'${element.uid_comment_by}'` : element.uid_comment_by;
-                element.comment = element.comment ? `'${element.comment}'` : element.comment;
+                element.comment = element.comment ? `'${escapeHTML(element.comment)}'` : element.comment;
                 element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
                 element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
                 element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
 
-                return "INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.uid_registration + ", " + element.uid + ", " + element.comment + ", " + element.uid_comment_by + ", " + element.status + ", " + element.status_by + ", " + element.status_date + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+                return format("INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);", element.uid_registration, element.uid, element.comment, element.uid_comment_by, element.status, element.status_by, element.status_date, element.enabled, element.uid_profile, element.uid_object, element.created_at, element.updated_at);
               })
-              .join("");
+              .join("\n");
             contentTCS = contentTCS ? contentTCS : "";
 
             let contentTPD = tPatientDiagnose.rows
@@ -498,7 +504,7 @@ async function bridging(startDate, endDate) {
                 // element.isVerify = element.isVerify ? `'${element.isVerify}'` : element.isVerify;
                 element.additional = element.additional ? `'${JSON.stringify(element.additional)}'` : element.additional;
 
-                return "INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(" + element.id + ", " + element.microscopic_value + ", " + element.growth + ", " + element.bacteria_result + ", " + element.antibiotic_test_result + ", " + element.uid_t_patient_exam + ", " + element.mrn + ", " + element.uid_registration + ", " + element.sample_num + ", " + element.taken_date + ", " + element.taken_by + ", " + element.verified_date + ", " + element.verified_by + ", " + element.approved_date + ", " + element.approved_by + ", " + element.uid_test + ", " + element.keterangan + ", " + element.jaringan + ", " + element.request_type + ", " + element.speciment_type + ", " + element.additional + ");" + "\n";
+                return format("INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);", element.id, element.microscopic_value, element.growth, element.bacteria_result, element.antibiotic_test_result, element.uid_t_patient_exam, element.mrn, element.uid_registration, element.sample_num, element.taken_date, element.taken_by, element.verified_date, element.verified_by, element.approved_date, element.approved_by, element.uid_test, element.keterangan, element.jaringan, element.request_type, element.speciment_type, element.additional);
               })
               .join("");
             contentTPEM = contentTPEM ? contentTPEM : "";
@@ -790,7 +796,6 @@ async function manual(startDate, endDate) {
                 let tPatientExaminationCritical = await client1.query("SELECT * FROM t_patient_examination_critical WHERE uid_patient_exam='" + element.uid + "'");
 
                 element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-                element.print_date = `'${new Date(element.print_date).toISOString()}'`;
                 element.pending_date = `'${new Date(element.pending_date).toISOString()}'`;
                 element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
                 element.verify_date = `'${new Date(element.verify_date).toISOString()}'`;
@@ -817,8 +822,10 @@ async function manual(startDate, endDate) {
                 element.uid_parent = element.uid_parent ? `'${element.uid_parent}'` : element.uid_parent;
                 element.uid_nilai_normal = element.uid_nilai_normal ? `'${element.uid_nilai_normal}'` : element.uid_nilai_normal;
                 element.role_text = element.role_text ? `'${element.role_text}'` : element.role_text;
+                element.sign = element.sign ? `'${element.sign}'` : element.sign;
+                element.print_date = `'${new Date(element.print_date).toISOString()}'`;
 
-                examContent = "INSERT INTO t_patient_examination (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, print_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, flag, pending_date, pending_by, uid_acc_by, uid_created_by, uid_action_by, uid_package, uid_panel, uid_parent, uid_nilai_normal, uid, enabled, uid_profile, uid_object, created_at, updated_at, approve_mobile, uid_rolebase, role_text, sign, id_order, is_duplo) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + ", " + element.value_string + ", " + element.value_memo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.print_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.flag + ", " + element.pending_date + ", " + element.pending_by + ", " + element.uid_acc_by + ", " + element.uid_created_by + ", " + element.uid_action_by + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.uid_nilai_normal + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + "," + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.uid_rolebase + "," + element.role_text + "," + element.sign + ", " + element.id_order + "," + element.is_duplo + ");\n";
+                examContent = format("INSERT INTO t_patient_examination (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, print_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, flag, pending_date, pending_by, uid_acc_by, uid_created_by, uid_action_by, uid_package, uid_panel, uid_parent, uid_nilai_normal, uid, enabled, uid_profile, uid_object, created_at, updated_at, approve_mobile, uid_rolebase, role_text, sign, id_order, is_duplo) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);", element.mrn, element.uid_registration, element.uid_test, element.value, element.value_string, escapeHTML(element.value_memo), element.is_verify, element.verify_date, element.print_date, element.uid_verify_by, element.uid_instrument, element.is_acc, element.acc_date, element.is_edit, element.flag, element.pending_date, element.pending_by, element.uid_acc_by, element.uid_created_by, element.uid_action_by, element.uid_package, element.uid_panel, element.uid_parent, element.uid_nilai_normal, element.uid, element.enabled, element.uid_profile, element.uid_object, element.created_at, element.updated_at, element.approve_mobile, element.uid_rolebase, element.role_text, element.sign, element.id_order, element.is_duplo);
 
                 if (tPatientExaminationCritical.rowCount > 0) {
                   tPatientExaminationCritical.rows[0].remark = tPatientExaminationCritical.rows[0].remark ? `'${tPatientExaminationCritical.rows[0].remark}'` : tPatientExaminationCritical.rows[0].remark;
@@ -832,9 +839,10 @@ async function manual(startDate, endDate) {
                   tPatientExaminationCritical.rows[0].updated_at = tPatientExaminationCritical.rows[0].updated_at ? `'${new Date(tPatientExaminationCritical.rows[0].updated_at).toISOString()}'` : tPatientExaminationCritical.rows[0].updated_at;
                   tPatientExaminationCritical.rows[0].uid_patient_exam = tPatientExaminationCritical.rows[0].uid_patient_exam ? `'${tPatientExaminationCritical.rows[0].uid_patient_exam}'` : tPatientExaminationCritical.rows[0].uid_patient_exam;
                   tPatientExaminationCritical.rows[0].confirm_date = tPatientExaminationCritical.rows[0].confirm_date ? `'${new Date(tPatientExaminationCritical.rows[0].confirm_date).toISOString()}'` : tPatientExaminationCritical.rows[0].confirm_date;
+                  tPatientExaminationCritical.rows[0].confirm_user = tPatientExaminationCritical.rows[0].confirm_user ? `'${new Date(tPatientExaminationCritical.rows[0].confirm_user).toISOString()}'` : tPatientExaminationCritical.rows[0].confirm_user;
                   // tPatientExaminationCritical.rows[0].confirm_date = new Date(tPatientExaminationCritical.rows[0].confirm_date).toISOString();
 
-                  examContent += "INSERT INTO t_patient_examination_critical (uid_patient_exam, remark, uid_user_by, uid_user_to, uid, enabled, uid_profile, uid_object,  created_at, updated_at, confirm_date, confirm_user) VALUES(" + tPatientExaminationCritical.rows[0].uid_patient_exam + ", " + tPatientExaminationCritical.rows[0].remark + ", " + tPatientExaminationCritical.rows[0].uid_user_by + ", " + tPatientExaminationCritical.rows[0].uid_user_to + ", " + tPatientExaminationCritical.rows[0].uid + ", " + tPatientExaminationCritical.rows[0].enabled + ", " + tPatientExaminationCritical.rows[0].uid_profile + "," + tPatientExaminationCritical.rows[0].uid_object + ", " + tPatientExaminationCritical.rows[0].created_at + ", " + tPatientExaminationCritical.rows[0].updated_at + ", " + tPatientExaminationCritical.rows[0].confirm_date + ", " + tPatientExaminationCritical.rows[0].confirm_user + ");\n";
+                  examContent += "INSERT INTO t_patient_examination_critical (uid_patient_exam, remark, uid_user_by, uid_user_to, uid, enabled, uid_profile, uid_object,  created_at, updated_at, confirm_date, confirm_user) VALUES(" + tPatientExaminationCritical.rows[0].uid_patient_exam + ", " + tPatientExaminationCritical.rows[0].remark + ", " + tPatientExaminationCritical.rows[0].uid_user_by + ", " + tPatientExaminationCritical.rows[0].uid_user_to + ", " + tPatientExaminationCritical.rows[0].uid + ", " + tPatientExaminationCritical.rows[0].enabled + ", " + tPatientExaminationCritical.rows[0].uid_profile + ", " + tPatientExaminationCritical.rows[0].uid_object + ", " + tPatientExaminationCritical.rows[0].created_at + ", " + tPatientExaminationCritical.rows[0].updated_at + ", " + tPatientExaminationCritical.rows[0].confirm_date + ", " + tPatientExaminationCritical.rows[0].confirm_user + ");\n";
                 }
 
                 if (tCommentTest.rowCount > 0) {
@@ -849,8 +857,9 @@ async function manual(startDate, endDate) {
                   tCommentTest.rows[0].uid_comment_by = tCommentTest.rows[0].uid_comment_by ? `${tCommentTest.rows[0].uid_comment_by}` : tCommentTest.rows[0].uid_comment_by;
                   tCommentTest.rows[0].created_at = tCommentTest.rows[0].created_at ? `'${new Date(tCommentTest.rows[0].created_at).toISOString()}'` : tCommentTest.rows[0].created_at;
                   tCommentTest.rows[0].updated_at = tCommentTest.rows[0].updated_at ? `'${new Date(tCommentTest.rows[0].updated_at).toISOString()}'` : tCommentTest.rows[0].updated_at;
+                  tCommentTest.rows[0].status_date = tCommentTest.rows[0].status_date ? `'${new Date(tCommentTest.rows[0].status_date).toISOString()}'` : tCommentTest.rows[0].status_date;
 
-                  examContent += "INSERT INTO t_comment_test (uid_examination, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + tCommentTest.rows[0].uid_examination + ", " + tCommentTest.rows[0].uid + ", " + tCommentTest.rows[0].comment + ", " + tCommentTest.rows[0].uid_comment_by + "," + tCommentTest.rows[0].status + ", " + tCommentTest.rows[0].status_by + ", " + tCommentTest.rows[0].status_date + ", " + tCommentTest.rows[0].enabled + ", " + tCommentTest.rows[0].uid_profile + ", " + tCommentTest.rows[0].uid_object + ", " + tCommentTest.rows[0].created_at + ", " + tCommentTest.rows[0].updated_at + ");\n";
+                  examContent += format("INSERT INTO t_comment_test (uid_examination, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);\n", tCommentTest.rows[0].uid_examination, tCommentTest.rows[0].uid, escapeHTML(tCommentTest.rows[0].comment), tCommentTest.rows[0].uid_comment_by, tCommentTest.rows[0].status, tCommentTest.rows[0].status_by, tCommentTest.rows[0].status_date, tCommentTest.rows[0].enabled, tCommentTest.rows[0].uid_profile, tCommentTest.rows[0].uid_object, tCommentTest.rows[0].created_at, tCommentTest.rows[0].updated_at);
                 }
 
                 if (tHistoryApprove.rowCount > 0) {
@@ -897,7 +906,6 @@ async function manual(startDate, endDate) {
             contentTPE[0] = contentTPE[0] ? contentTPE[0] : "";
             let contentTCS = tCommentSample.rows
               .map((element) => {
-                // console.log("ADA", contentTPR);
                 if (!element) {
                   return "";
                 }
@@ -909,12 +917,12 @@ async function manual(startDate, endDate) {
                 element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
                 element.uid = element.uid ? `'${element.uid}'` : element.uid;
                 element.uid_comment_by = element.uid_comment_by ? `'${element.uid_comment_by}'` : element.uid_comment_by;
-                element.comment = element.comment ? `'${element.comment}'` : element.comment;
+                element.comment = element.comment ? `'${escapeHTML(element.comment)}'` : element.comment;
                 element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
                 element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
                 element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
 
-                return "INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.uid_registration + ", " + element.uid + ", " + element.comment + ", " + element.uid_comment_by + ", " + element.status + ", " + element.status_by + ", " + element.status_date + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+                return format("INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);", element.uid_registration, element.uid, element.comment, element.uid_comment_by, element.status, element.status_by, element.status_date, element.enabled, element.uid_profile, element.uid_object, element.created_at, element.updated_at);
               })
               .join("\n");
             contentTCS = contentTCS ? contentTCS : "";
@@ -974,7 +982,7 @@ async function manual(startDate, endDate) {
                 // element.isVerify = element.isVerify ? `'${element.isVerify}'` : element.isVerify;
                 element.additional = element.additional ? `'${JSON.stringify(element.additional)}'` : element.additional;
 
-                return "INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(" + element.id + ", " + element.microscopic_value + ", " + element.growth + ", " + element.bacteria_result + ", " + element.antibiotic_test_result + ", " + element.uid_t_patient_exam + ", " + element.mrn + ", " + element.uid_registration + ", " + element.sample_num + ", " + element.taken_date + ", " + element.taken_by + ", " + element.verified_date + ", " + element.verified_by + ", " + element.approved_date + ", " + element.approved_by + ", " + element.uid_test + ", " + element.keterangan + ", " + element.jaringan + ", " + element.request_type + ", " + element.speciment_type + ", " + element.additional + ");" + "\n";
+                return format("INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L, %L);", element.id, element.microscopic_value, element.growth, element.bacteria_result, element.antibiotic_test_result, element.uid_t_patient_exam, element.mrn, element.uid_registration, element.sample_num, element.taken_date, element.taken_by, element.verified_date, element.verified_by, element.approved_date, element.approved_by, element.uid_test, element.keterangan, element.jaringan, element.request_type, element.speciment_type, element.additional);
               })
               .join("\n");
             contentTPEM = contentTPEM ? contentTPEM : "";
