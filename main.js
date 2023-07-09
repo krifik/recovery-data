@@ -73,6 +73,7 @@ async function bridging(startDate, endDate) {
           let tPatientOrderDetail = await client1.query("SELECT * FROM t_patient_order_detail WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           let tPatientOrder = await client1.query("SELECT * FROM t_patient_order WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
           if (tPatientOrder.rowCount > 0) {
+            let tHistoryApproveSample = await client1.query("SELECT * FROM t_history_approve_sample WHERE reg_num='" + tPatientRegistrationItem.reg_num + "'");
             let tPatientSample = await client1.query("SELECT * FROM t_patient_sample WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
             let tPatientSampleSpeciment = await client1.query("SELECT * FROM t_patient_sample_speciment WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
             let tPatientPayment = await client1.query("SELECT * FROM t_patient_payment WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
@@ -81,6 +82,7 @@ async function bridging(startDate, endDate) {
 
             let tCommentSample = await client1.query("SELECT * FROM t_comment_sample WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
             let tPatientDiagnose = await client1.query("SELECT * FROM t_patient_diagnose WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
+
             let tPatientExamMicro = await client1.query("SELECT * FROM t_patient_exam_microbiology WHERE uid_registration='" + tPatientRegistrationItem.uid + "'");
 
             element.updated_at = new Date(element.updated_at).toISOString();
@@ -119,127 +121,156 @@ async function bridging(startDate, endDate) {
             tPatientRegistrationItem.uid_doctor = !tPatientRegistrationItem.uid_doctor ? tPatientRegistrationItem.uid_doctor : `'${tPatientRegistrationItem.uid_doctor}'`;
             let contentTPR = "INSERT INTO t_patient_registration (mrn, patient_type, guarantor, members_number, referral_type, uid_ward, uid_class, uid_doctor_referral, uid_facility_referral, uid_doctor, is_cyto, reg_num, registration_date,created_by, uid_updated_by, uid, enabled, uid_profile, uid_object, created_at, updated_at, cancelation_remark, cancelation_date, is_bridge, room_number, source, no_reg, sign_fast, fast_note, is_pregnant, is_mcu, uid_doctor_incharge) VALUES(" + tPatientRegistrationItem.mrn + " ," + tPatientRegistrationItem.patient_type + "," + tPatientRegistrationItem.guarantor + ", " + tPatientRegistrationItem.members_number + " , " + tPatientRegistrationItem.referral_type + ", " + tPatientRegistrationItem.uid_ward + ", " + tPatientRegistrationItem.uid_class + ", " + tPatientRegistrationItem.uid_doctor_referral + ", " + tPatientRegistrationItem.uid_facility_referral + ", " + tPatientRegistrationItem.uid_doctor + ", " + tPatientRegistrationItem.is_cyto + ", " + tPatientRegistrationItem.reg_num + ", " + tPatientRegistrationItem.registration_date + ", " + tPatientRegistrationItem.created_by + ", " + tPatientRegistrationItem.uid_updated_by + ", " + tPatientRegistrationItem.uid + ", " + tPatientRegistrationItem.enabled + ", " + tPatientRegistrationItem.uid_profile + ", " + tPatientRegistrationItem.uid_object + ", " + tPatientRegistrationItem.created_at + ", " + tPatientRegistrationItem.updated_at + ", " + tPatientRegistrationItem.cancelation_remark + ", " + tPatientRegistrationItem.cancelation_date + ", " + tPatientRegistrationItem.is_bridge + ", " + tPatientRegistrationItem.room_number + ", " + tPatientRegistrationItem.source + ", " + tPatientRegistrationItem.no_reg + ", " + tPatientRegistrationItem.sign_fast + ", " + tPatientRegistrationItem.fast_note + ", " + tPatientRegistrationItem.is_pregnant + ", " + tPatientRegistrationItem.is_mcu + ", " + tPatientRegistrationItem.uid_doctor_incharge + ");";
 
+            let contentTHAS = tHistoryApproveSample.rows
+              .map((element) => {
+                // console.log("ADA", contentTPR);
+                if (!element) {
+                  return "";
+                }
+
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
+
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
+                element.uid_acc_by = element.uid_acc_by ? `'${element.uid_acc_by}'` : element.uid_acc_by;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+
+                return "INSERT INTO t_history_approve_sample (mrn, reg_num, acc_date, uid, uid_acc_by, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.mrn + ", " + element.reg_num + ", " + element.acc_date + ", " + element.uid + ", " + element.uid_acc_by + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+              })
+              .join("\n");
+            contentTHAS = contentTHAS ? contentTHAS : "";
             // t patient order
-            let contentTPO = tPatientOrder.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPO = tPatientOrder.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              // element.created_at = element.created_at = new Date(element.created_at).toISOString();
-              // element.updated_at = element.updated_at = new Date(element.updated_at).toISOString();
-              // element.mrn = !element.mrn ? element.mrn : element.mrn;
-              // element.uid_registration = !element.uid_registration ? element.uid_registration : element.uid_registration;
-              // element.uid_test = !element.uid_test ? element.uid_test : element.uid_test;
-              // element.id_type_test = !element.id_type_test ? element.id_type_test : element.id_type_test;
-              // element.quantity = !element.quantity ? element.quantity : element.quantity;
-              // element.uid_created_by = !element.uid_created_by ? element.uid_created_by : element.uid_created_by;
-              // element.uid_updated_by = !element.uid_updated_by ? element.uid_updated_by : element.uid_updated_by;
-              // element.uid = !element.uid ? element.uid : element.uid;
-              // element.uid_profile = !element.uid_profile ? element.uid_profile : element.uid_profile;
-              // element.uid_object = !element.uid_object ? element.uid_object : element.uid_object;
-              // element.created_at = !element.created_at ? element.created_at : element.created_at;
-              // element.updated_at = !element.updated_at ? element.updated_at : element.updated_at;
+                // element.created_at = element.created_at = new Date(element.created_at).toISOString();
+                // element.updated_at = element.updated_at = new Date(element.updated_at).toISOString();
+                // element.mrn = !element.mrn ? element.mrn : element.mrn;
+                // element.uid_registration = !element.uid_registration ? element.uid_registration : element.uid_registration;
+                // element.uid_test = !element.uid_test ? element.uid_test : element.uid_test;
+                // element.id_type_test = !element.id_type_test ? element.id_type_test : element.id_type_test;
+                // element.quantity = !element.quantity ? element.quantity : element.quantity;
+                // element.uid_created_by = !element.uid_created_by ? element.uid_created_by : element.uid_created_by;
+                // element.uid_updated_by = !element.uid_updated_by ? element.uid_updated_by : element.uid_updated_by;
+                // element.uid = !element.uid ? element.uid : element.uid;
+                // element.uid_profile = !element.uid_profile ? element.uid_profile : element.uid_profile;
+                // element.uid_object = !element.uid_object ? element.uid_object : element.uid_object;
+                // element.created_at = !element.created_at ? element.created_at : element.created_at;
+                // element.updated_at = !element.updated_at ? element.updated_at : element.updated_at;
 
-              element.created_at = element.created_at ? `${new Date(element.created_at).toISOString()}` : element.created_at;
-              element.updated_at = element.updated_at ? `${new Date(element.updated_at).toISOString()}` : element.updated_at;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
-              element.id_type_test = element.id_type_test ? `'${element.id_type_test}'` : element.id_type_test;
-              element.quantity = element.quantity ? `'${element.quantity}'` : element.quantity;
-              element.uid_created_by = element.uid_created_by ? `'${element.uid_created_by}'` : element.uid_created_by;
-              element.uid_updated_by = element.uid_updated_by ? `'${element.uid_updated_by}'` : element.uid_updated_by;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.created_at = element.created_at ? `'${element.created_at}'` : element.created_at;
-              element.updated_at = element.updated_at ? `'${element.updated_at}'` : element.updated_at;
+                element.created_at = element.created_at ? `${new Date(element.created_at).toISOString()}` : element.created_at;
+                element.updated_at = element.updated_at ? `${new Date(element.updated_at).toISOString()}` : element.updated_at;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
+                element.id_type_test = element.id_type_test ? `'${element.id_type_test}'` : element.id_type_test;
+                element.quantity = element.quantity ? `'${element.quantity}'` : element.quantity;
+                element.uid_created_by = element.uid_created_by ? `'${element.uid_created_by}'` : element.uid_created_by;
+                element.uid_updated_by = element.uid_updated_by ? `'${element.uid_updated_by}'` : element.uid_updated_by;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.created_at = element.created_at ? `'${element.created_at}'` : element.created_at;
+                element.updated_at = element.updated_at ? `'${element.updated_at}'` : element.updated_at;
 
-              return "INSERT INTO t_patient_order (mrn, uid_registration, uid_test, id_type_test, quantity, uid_created_by, uid_updated_by, enabled, uid, uid_profile, uid_object, created_at, updated_at, is_bridge) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.id_type_test + ", " + element.quantity + ", " + element.uid_created_by + ", " + element.uid_updated_by + ", " + element.enabled + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_order (mrn, uid_registration, uid_test, id_type_test, quantity, uid_created_by, uid_updated_by, enabled, uid, uid_profile, uid_object, created_at, updated_at, is_bridge) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.id_type_test + ", " + element.quantity + ", " + element.uid_created_by + ", " + element.uid_updated_by + ", " + element.enabled + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ");" + "\n";
+              })
+              .join("");
 
-            let contentTPOD = tPatientOrderDetail.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPOD = tPatientOrderDetail.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
-              element.verify_date = `'${new Date(element.verify_date).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
+                element.verify_date = `'${new Date(element.verify_date).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
-              element.value = !element.value ? element.value : `'${element.value}'`;
-              element.value_string = !element.value_string ? element.value_string : `'${element.value_string}'`;
-              element.value_memo = !element.value_memo ? element.value_memo : `'${element.value_memo}'`;
-              element.uid_verify_by = !element.uid_verify_by ? element.uid_verify_by : `'${element.uid_verify_by}'`;
-              element.uid_instrument = !element.uid_instrument ? element.uid_instrument : `'${element.uid_instrument}'`;
-              element.uid_acc_by = !element.uid_acc_by ? element.uid_acc_by : `'${element.uid_acc_by}'`;
-              element.uid_action_by = !element.uid_action_by ? element.uid_action_by : `'${element.uid_action_by}'`;
-              element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
-              element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
-              element.uid = !element.uid ? element.uid : `'${element.uid}'`;
-              element.flag = !element.flag ? element.flag : `'${element.flag}'`;
-              element.uid_nilai_normal = !element.uid_nilai_normal ? element.uid_nilai_normal : `'${element.uid_nilai_normal}'`;
-              element.uid_package = !element.uid_package ? element.uid_package : `'${element.uid_package}'`;
-              element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
-              element.uid_parent = !element.uid_parent ? element.uid_parent : `'${element.uid_parent}'`;
-              element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
-              element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
+                element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
+                element.value = !element.value ? element.value : `'${element.value}'`;
+                element.value_string = !element.value_string ? element.value_string : `'${element.value_string}'`;
+                element.value_memo = !element.value_memo ? element.value_memo : `'${element.value_memo}'`;
+                element.uid_verify_by = !element.uid_verify_by ? element.uid_verify_by : `'${element.uid_verify_by}'`;
+                element.uid_instrument = !element.uid_instrument ? element.uid_instrument : `'${element.uid_instrument}'`;
+                element.uid_acc_by = !element.uid_acc_by ? element.uid_acc_by : `'${element.uid_acc_by}'`;
+                element.uid_action_by = !element.uid_action_by ? element.uid_action_by : `'${element.uid_action_by}'`;
+                element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
+                element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
+                element.uid = !element.uid ? element.uid : `'${element.uid}'`;
+                element.flag = !element.flag ? element.flag : `'${element.flag}'`;
+                element.uid_nilai_normal = !element.uid_nilai_normal ? element.uid_nilai_normal : `'${element.uid_nilai_normal}'`;
+                element.uid_package = !element.uid_package ? element.uid_package : `'${element.uid_package}'`;
+                element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
+                element.uid_parent = !element.uid_parent ? element.uid_parent : `'${element.uid_parent}'`;
+                element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
+                element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
 
-              return "INSERT INTO t_patient_order_detail (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, uid_acc_by, uid_action_by, enabled, uid_profile, uid_object, uid, flag, uid_nilai_normal, uid_package, uid_panel, uid_parent, created_at, updated_at, approve_mobile, id_order) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + " , " + element.value_string + ", " + element.value_memo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.uid_acc_by + ", " + element.uid_action_by + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.uid + ", " + element.flag + ", " + element.uid_nilai_normal + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.id_order + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_order_detail (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, uid_acc_by, uid_action_by, enabled, uid_profile, uid_object, uid, flag, uid_nilai_normal, uid_package, uid_panel, uid_parent, created_at, updated_at, approve_mobile, id_order) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + " , " + element.value_string + ", " + element.value_memo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.uid_acc_by + ", " + element.uid_action_by + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.uid + ", " + element.flag + ", " + element.uid_nilai_normal + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.id_order + ");" + "\n";
+              })
+              .join("");
 
-            let contentTPS = tPatientSample.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPS = tPatientSample.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              element.sample_num = !element.sample_num ? element.sample_num : `'${element.sample_num}'`;
-              element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
-              element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
-              element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
-              element.taken_date = !element.taken_date ? element.taken_date : `${element.taken_date}`;
-              element.type_ref = !element.type_ref ? element.type_ref : `'${element.type_ref}'`;
-              element.qty_print = !element.qty_print ? element.qty_print : `'${element.qty_print}'`;
-              element.uid_paket = !element.uid_paket ? element.uid_paket : `'${element.uid_paket}'`;
-              element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
-              element.uid = !element.uid ? element.uid : `'${element.uid}'`;
-              element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
-              element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
-              element.uid_by = !element.uid_by ? element.uid_by : `'${element.uid_by}'`;
-              element.read_by = !element.read_by ? element.read_by : `'${element.read_by}'`;
+                element.sample_num = !element.sample_num ? element.sample_num : `'${element.sample_num}'`;
+                element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
+                element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
+                element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
+                element.taken_date = !element.taken_date ? element.taken_date : `${element.taken_date}`;
+                element.type_ref = !element.type_ref ? element.type_ref : `'${element.type_ref}'`;
+                element.qty_print = !element.qty_print ? element.qty_print : `'${element.qty_print}'`;
+                element.uid_paket = !element.uid_paket ? element.uid_paket : `'${element.uid_paket}'`;
+                element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
+                element.uid = !element.uid ? element.uid : `'${element.uid}'`;
+                element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
+                element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
+                element.uid_by = !element.uid_by ? element.uid_by : `'${element.uid_by}'`;
+                element.read_by = !element.read_by ? element.read_by : `'${element.read_by}'`;
 
-              return "INSERT INTO t_patient_sample (sample_num, mrn, uid_registration, uid_test, taken_date, type_ref, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at, uid_by, is_read, read_by) VALUES(" + element.sample_num + ", " + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.type_ref + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.uid_by + ", " + element.is_read + ", " + element.read_by + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_sample (sample_num, mrn, uid_registration, uid_test, taken_date, type_ref, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at, uid_by, is_read, read_by) VALUES(" + element.sample_num + ", " + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.type_ref + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.uid_by + ", " + element.is_read + ", " + element.read_by + ");" + "\n";
+              })
+              .join("\n");
             contentTPS = contentTPS ? contentTPS : "";
-            let contentTPSS = tPatientSampleSpeciment.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPSS = tPatientSampleSpeciment.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              element.specimen = element.specimen ? `'${element.specimen}'` : element.specimen;
-              element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
-              element.taken_date = element.taken_date ? `${element.taken_date}` : element.taken_date;
-              element.uid_paket = element.uid_paket ? `'${element.uid_paket}'` : element.uid_paket;
-              element.uid_panel = element.uid_panel ? `'${element.uid_panel}'` : element.uid_panel;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.specimen = element.specimen ? `'${element.specimen}'` : element.specimen;
+                element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
+                element.taken_date = element.taken_date ? `${element.taken_date}` : element.taken_date;
+                element.uid_paket = element.uid_paket ? `'${element.uid_paket}'` : element.uid_paket;
+                element.uid_panel = element.uid_panel ? `'${element.uid_panel}'` : element.uid_panel;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
 
-              return "INSERT INTO t_patient_sample_speciment (reg_num, mrn, specimen, uid_registration, uid_test, taken_date, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.reg_num + ", " + element.mrn + ", " + element.specimen + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_sample_speciment (reg_num, mrn, specimen, uid_registration, uid_test, taken_date, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.reg_num + ", " + element.mrn + ", " + element.specimen + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+              })
+              .join("\n");
             contentTPSS = contentTPSS ? contentTPSS : "";
 
             let contentTPE = await Promise.all(
@@ -357,118 +388,128 @@ async function bridging(startDate, endDate) {
             // console.log(contentTPE.includes("t_patient_examination_critical") ? contentTPE : "");
             // contentTPE = contentTPE.replace(",INSERT", "INSERT");
             contentTPE[0] = contentTPE[0] ? contentTPE[0] : "";
-            let contentTCS = tCommentSample.rows.map((element) => {
-              // console.log("ADA", contentTPR);
-              if (!element) {
-                return "";
-              }
+            let contentTCS = tCommentSample.rows
+              .map((element) => {
+                // console.log("ADA", contentTPR);
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
-              element.status_date = `'${new Date(element.status_date).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.status_date = `'${new Date(element.status_date).toISOString()}'`;
 
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_comment_by = element.uid_comment_by ? `'${element.uid_comment_by}'` : element.uid_comment_by;
-              element.comment = element.comment ? `'${element.comment}'` : element.comment;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_comment_by = element.uid_comment_by ? `'${element.uid_comment_by}'` : element.uid_comment_by;
+                element.comment = element.comment ? `'${element.comment}'` : element.comment;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
 
-              return "INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.uid_registration + ", " + element.uid + ", " + element.comment + ", " + element.uid_comment_by + ", " + element.status + ", " + element.status_by + ", " + element.status_date + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.uid_registration + ", " + element.uid + ", " + element.comment + ", " + element.uid_comment_by + ", " + element.status + ", " + element.status_by + ", " + element.status_date + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+              })
+              .join("");
             contentTCS = contentTCS ? contentTCS : "";
 
-            let contentTPD = tPatientDiagnose.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPD = tPatientDiagnose.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.diagnose = element.diagnose ? `'${element.diagnose}'` : element.diagnose;
-              element.icd10 = element.icd10 ? `'${element.icd10}'` : element.icd10;
-              element.icd10_text = element.icd10_text ? `'${element.icd10_text}'` : element.icd10_text;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
-              element.source = element.source ? `'${element.source}'` : element.source;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.diagnose = element.diagnose ? `'${element.diagnose}'` : element.diagnose;
+                element.icd10 = element.icd10 ? `'${element.icd10}'` : element.icd10;
+                element.icd10_text = element.icd10_text ? `'${element.icd10_text}'` : element.icd10_text;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
+                element.source = element.source ? `'${element.source}'` : element.source;
 
-              return "INSERT INTO t_patient_diagnose (uid_registration, diagnose, icd10, icd10_text, uid, uid_profile, uid_object, created_at, updated_at, source,type) VALUES(" + element.uid_registration + ", " + element.diagnose + ", " + element.icd10 + ", " + element.icd10_text + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.source + ", " + element.type + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_diagnose (uid_registration, diagnose, icd10, icd10_text, uid, uid_profile, uid_object, created_at, updated_at, source,type) VALUES(" + element.uid_registration + ", " + element.diagnose + ", " + element.icd10 + ", " + element.icd10_text + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.source + ", " + element.type + ");" + "\n";
+              })
+              .join("");
             contentTPD = contentTPD ? contentTPD : "";
 
-            let contentTPEM = tPatientExamMicro.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPEM = tPatientExamMicro.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
-              element.verified_date = `'${new Date(element.verified_date).toISOString()}'`;
-              // console.log("ada", contentTPR);
-              // console.log(JSON.stringify(element.microscopic_value));
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.microscopic_value = element.microscopic_value ? `'${JSON.stringify(element.microscopic_value)}'` : element.microscopic_value;
-              element.bacteria_result = element.bacteria_result ? `'${JSON.stringify(element.bacteria_result)}'` : element.bacteria_result;
-              element.antibiotic_test_result = element.antibiotic_test_result ? `'${JSON.stringify(element.antibiotic_test_result)}'` : element.antibiotic_test_result;
-              element.uid_t_patient_exam = element.uid_t_patient_exam ? `'${element.uid_t_patient_exam}'` : element.uid_t_patient_exam;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
-              element.uid_registration = element.uid_registration ? `${element.uid_registration}` : element.uid_registration;
-              element.sample_num = element.sample_num ? `'${element.sample_num}'` : element.sample_num;
-              element.taken_by = element.taken_by ? `'${element.taken_by}'` : element.taken_by;
-              element.verified_by = element.verified_by ? `'${element.verified_by}'` : element.verified_by;
-              element.approved_by = element.approved_by ? `'${element.approved_by}'` : element.approved_by;
-              element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
-              element.keterangan = element.keterangan ? `'${element.keterangan}'` : element.keterangan;
-              element.isEdited = element.isEdited ? `'${element.isEdited}'` : element.isEdited;
-              element.jaringan = element.jaringan ? `'${element.jaringan}'` : element.jaringan;
-              element.request_type = element.request_type ? `'${element.request_type}'` : element.request_type;
-              element.speciment_type = element.speciment_type ? `'${element.speciment_type}'` : element.speciment_type;
-              element.id = element.id ? `'${element.id}'` : element.id;
-              // element.isVerify = element.isVerify ? `'${element.isVerify}'` : element.isVerify;
-              element.additional = element.additional ? `'${JSON.stringify(element.additional)}'` : element.additional;
+                element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
+                element.verified_date = `'${new Date(element.verified_date).toISOString()}'`;
+                // console.log("ada", contentTPR);
+                // console.log(JSON.stringify(element.microscopic_value));
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.microscopic_value = element.microscopic_value ? `'${JSON.stringify(element.microscopic_value)}'` : element.microscopic_value;
+                element.bacteria_result = element.bacteria_result ? `'${JSON.stringify(element.bacteria_result)}'` : element.bacteria_result;
+                element.antibiotic_test_result = element.antibiotic_test_result ? `'${JSON.stringify(element.antibiotic_test_result)}'` : element.antibiotic_test_result;
+                element.uid_t_patient_exam = element.uid_t_patient_exam ? `'${element.uid_t_patient_exam}'` : element.uid_t_patient_exam;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid_registration = element.uid_registration ? `${element.uid_registration}` : element.uid_registration;
+                element.sample_num = element.sample_num ? `'${element.sample_num}'` : element.sample_num;
+                element.taken_by = element.taken_by ? `'${element.taken_by}'` : element.taken_by;
+                element.verified_by = element.verified_by ? `'${element.verified_by}'` : element.verified_by;
+                element.approved_by = element.approved_by ? `'${element.approved_by}'` : element.approved_by;
+                element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
+                element.keterangan = element.keterangan ? `'${element.keterangan}'` : element.keterangan;
+                element.isEdited = element.isEdited ? `'${element.isEdited}'` : element.isEdited;
+                element.jaringan = element.jaringan ? `'${element.jaringan}'` : element.jaringan;
+                element.request_type = element.request_type ? `'${element.request_type}'` : element.request_type;
+                element.speciment_type = element.speciment_type ? `'${element.speciment_type}'` : element.speciment_type;
+                element.id = element.id ? `'${element.id}'` : element.id;
+                // element.isVerify = element.isVerify ? `'${element.isVerify}'` : element.isVerify;
+                element.additional = element.additional ? `'${JSON.stringify(element.additional)}'` : element.additional;
 
-              return "INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(" + element.id + ", " + element.microscopic_value + ", " + element.growth + ", " + element.bacteria_result + ", " + element.antibiotic_test_result + ", " + element.uid_t_patient_exam + ", " + element.mrn + ", " + element.uid_registration + ", " + element.sample_num + ", " + element.taken_date + ", " + element.taken_by + ", " + element.verified_date + ", " + element.verified_by + ", " + element.approved_date + ", " + element.approved_by + ", " + element.uid_test + ", " + element.keterangan + ", " + element.jaringan + ", " + element.request_type + ", " + element.speciment_type + ", " + element.additional + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(" + element.id + ", " + element.microscopic_value + ", " + element.growth + ", " + element.bacteria_result + ", " + element.antibiotic_test_result + ", " + element.uid_t_patient_exam + ", " + element.mrn + ", " + element.uid_registration + ", " + element.sample_num + ", " + element.taken_date + ", " + element.taken_by + ", " + element.verified_date + ", " + element.verified_by + ", " + element.approved_date + ", " + element.approved_by + ", " + element.uid_test + ", " + element.keterangan + ", " + element.jaringan + ", " + element.request_type + ", " + element.speciment_type + ", " + element.additional + ");" + "\n";
+              })
+              .join("");
             contentTPEM = contentTPEM ? contentTPEM : "";
-            let contentTPP = tPatientPayment.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPP = tPatientPayment.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
-              element.payment_date = `'${new Date(element.payment_date).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.payment_date = `'${new Date(element.payment_date).toISOString()}'`;
 
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.amount_of_bill = element.amount_of_bill ? `'${element.amount_of_bill}'` : element.amount_of_bill;
-              element.amount_of_claim = element.amount_of_claim ? `'${element.amount_of_claim}'` : element.amount_of_claim;
-              element.amount_of_payment = element.amount_of_payment ? `'${element.amount_of_payment}'` : element.amount_of_payment;
-              element.amount_of_discount = element.amount_of_discount ? `'${element.amount_of_discount}'` : element.amount_of_discount;
-              element.amount_of_tax = element.amount_of_tax ? `'${element.amount_of_tax}'` : element.amount_of_tax;
-              element.remaining_pay = element.remaining_pay ? `'${element.remaining_pay}'` : element.remaining_pay;
-              element.uid_billing = element.uid_billing ? `'${element.uid_billing}'` : element.uid_billing;
-              element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
-              element.uid_payment_method = element.uid_payment_method ? `'${element.uid_payment_method}'` : element.uid_payment_method;
-              element.card_number = element.card_number ? `'${element.card_number}'` : element.card_number;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.amount_of_bill = element.amount_of_bill ? `'${element.amount_of_bill}'` : element.amount_of_bill;
+                element.amount_of_claim = element.amount_of_claim ? `'${element.amount_of_claim}'` : element.amount_of_claim;
+                element.amount_of_payment = element.amount_of_payment ? `'${element.amount_of_payment}'` : element.amount_of_payment;
+                element.amount_of_discount = element.amount_of_discount ? `'${element.amount_of_discount}'` : element.amount_of_discount;
+                element.amount_of_tax = element.amount_of_tax ? `'${element.amount_of_tax}'` : element.amount_of_tax;
+                element.remaining_pay = element.remaining_pay ? `'${element.remaining_pay}'` : element.remaining_pay;
+                element.uid_billing = element.uid_billing ? `'${element.uid_billing}'` : element.uid_billing;
+                element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
+                element.uid_payment_method = element.uid_payment_method ? `'${element.uid_payment_method}'` : element.uid_payment_method;
+                element.card_number = element.card_number ? `'${element.card_number}'` : element.card_number;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
 
-              element.discount = element.discount ? `'${element.discount}'` : element.discount;
-              element.tax = element.tax ? `'${element.tax}'` : element.tax;
-              element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.discount = element.discount ? `'${element.discount}'` : element.discount;
+                element.tax = element.tax ? `'${element.tax}'` : element.tax;
+                element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
 
-              return "INSERT INTO t_patient_payment (mrn, uid_registration, reg_num, amount_of_bill, amount_of_claim, amount_of_payment, amount_of_discount, amount_of_tax, remaining_pay, uid_billing, uid_claim, payment_date, uid_payment_method, card_number, uid, uid_profile, uid_object, created_at, updated_at, is_bridge, discount, tax) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.reg_num + ", " + element.amount_of_bill + ", " + element.amount_of_claim + ", " + element.amount_of_payment + ", " + element.amount_of_discount + ", " + element.amount_of_tax + ", " + element.remaining_pay + ", " + element.uid_billing + ", " + element.uid_claim + ", " + element.payment_date + ", " + element.uid_payment_method + ", " + element.card_number + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ", " + element.discount + ", " + element.tax + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_payment (mrn, uid_registration, reg_num, amount_of_bill, amount_of_claim, amount_of_payment, amount_of_discount, amount_of_tax, remaining_pay, uid_billing, uid_claim, payment_date, uid_payment_method, card_number, uid, uid_profile, uid_object, created_at, updated_at, is_bridge, discount, tax) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.reg_num + ", " + element.amount_of_bill + ", " + element.amount_of_claim + ", " + element.amount_of_payment + ", " + element.amount_of_discount + ", " + element.amount_of_tax + ", " + element.remaining_pay + ", " + element.uid_billing + ", " + element.uid_claim + ", " + element.payment_date + ", " + element.uid_payment_method + ", " + element.card_number + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ", " + element.discount + ", " + element.tax + ");" + "\n";
+              })
+              .join("");
             contentTPP = contentTPP ? contentTPP : "";
             contentTPE = contentTPE.join("");
-            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP;
+
+            contentTHAS = contentTHAS ? contentTHAS : "";
+            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS;
 
             fs.writeFile("./app/bridging/" + element.lno + ".sql", contentFull, (err) => {
               console.log("Writing SQL");
@@ -508,6 +549,7 @@ async function manual(startDate, endDate) {
             let tPatientSample = await client1.query("SELECT * FROM t_patient_sample WHERE uid_registration='" + element.uid + "'");
             let tPatientSampleSpeciment = await client1.query("SELECT * FROM t_patient_sample_speciment WHERE uid_registration='" + element.uid + "'");
             let tPatientPayment = await client1.query("SELECT * FROM t_patient_payment WHERE uid_registration='" + element.uid + "'");
+            let tHistoryApproveSample = await client1.query("SELECT * FROM t_history_approve_sample WHERE reg_num='" + element.reg_num + "'");
 
             let tPatientExamination = await client1.query("SELECT * FROM t_patient_examination WHERE uid_registration='" + element.uid + "'");
 
@@ -553,126 +595,134 @@ async function manual(startDate, endDate) {
             let contentTPR = "INSERT INTO t_patient_registration (mrn, patient_type, guarantor, members_number, referral_type, uid_ward, uid_class, uid_doctor_referral, uid_facility_referral, uid_doctor, is_cyto, reg_num, registration_date,created_by, uid_updated_by, uid, enabled, uid_profile, uid_object, created_at, updated_at, cancelation_remark, cancelation_date, is_bridge, room_number, source, no_reg, sign_fast, fast_note, is_pregnant, is_mcu, uid_doctor_incharge) VALUES(" + element.mrn + " ," + element.patient_type + "," + element.guarantor + ", " + element.members_number + " , " + element.referral_type + ", " + element.uid_ward + ", " + element.uid_class + ", " + element.uid_doctor_referral + ", " + element.uid_facility_referral + ", " + element.uid_doctor + ", " + element.is_cyto + ", " + element.reg_num + ", " + element.registration_date + ", " + element.created_by + ", " + element.uid_updated_by + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.cancelation_remark + ", " + element.cancelation_date + ", " + element.is_bridge + ", " + element.room_number + ", " + element.source + ", " + element.no_reg + ", " + element.sign_fast + ", " + element.fast_note + ", " + element.is_pregnant + ", " + element.is_mcu + ", " + element.uid_doctor_incharge + ");";
 
             // t patient order
-            let contentTPO = tPatientOrder.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPO = tPatientOrder.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              // element.created_at = element.created_at = new Date(element.created_at).toISOString();
-              // element.updated_at = element.updated_at = new Date(element.updated_at).toISOString();
-              // element.mrn = !element.mrn ? element.mrn : element.mrn;
-              // element.uid_registration = !element.uid_registration ? element.uid_registration : element.uid_registration;
-              // element.uid_test = !element.uid_test ? element.uid_test : element.uid_test;
-              // element.id_type_test = !element.id_type_test ? element.id_type_test : element.id_type_test;
-              // element.quantity = !element.quantity ? element.quantity : element.quantity;
-              // element.uid_created_by = !element.uid_created_by ? element.uid_created_by : element.uid_created_by;
-              // element.uid_updated_by = !element.uid_updated_by ? element.uid_updated_by : element.uid_updated_by;
-              // element.uid = !element.uid ? element.uid : element.uid;
-              // element.uid_profile = !element.uid_profile ? element.uid_profile : element.uid_profile;
-              // element.uid_object = !element.uid_object ? element.uid_object : element.uid_object;
-              // element.created_at = !element.created_at ? element.created_at : element.created_at;
-              // element.updated_at = !element.updated_at ? element.updated_at : element.updated_at;
+                // element.created_at = element.created_at = new Date(element.created_at).toISOString();
+                // element.updated_at = element.updated_at = new Date(element.updated_at).toISOString();
+                // element.mrn = !element.mrn ? element.mrn : element.mrn;
+                // element.uid_registration = !element.uid_registration ? element.uid_registration : element.uid_registration;
+                // element.uid_test = !element.uid_test ? element.uid_test : element.uid_test;
+                // element.id_type_test = !element.id_type_test ? element.id_type_test : element.id_type_test;
+                // element.quantity = !element.quantity ? element.quantity : element.quantity;
+                // element.uid_created_by = !element.uid_created_by ? element.uid_created_by : element.uid_created_by;
+                // element.uid_updated_by = !element.uid_updated_by ? element.uid_updated_by : element.uid_updated_by;
+                // element.uid = !element.uid ? element.uid : element.uid;
+                // element.uid_profile = !element.uid_profile ? element.uid_profile : element.uid_profile;
+                // element.uid_object = !element.uid_object ? element.uid_object : element.uid_object;
+                // element.created_at = !element.created_at ? element.created_at : element.created_at;
+                // element.updated_at = !element.updated_at ? element.updated_at : element.updated_at;
 
-              element.created_at = element.created_at ? `${new Date(element.created_at).toISOString()}` : element.created_at;
-              element.updated_at = element.updated_at ? `${new Date(element.updated_at).toISOString()}` : element.updated_at;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
-              element.id_type_test = element.id_type_test ? `'${element.id_type_test}'` : element.id_type_test;
-              element.quantity = element.quantity ? `'${element.quantity}'` : element.quantity;
-              element.uid_created_by = element.uid_created_by ? `'${element.uid_created_by}'` : element.uid_created_by;
-              element.uid_updated_by = element.uid_updated_by ? `'${element.uid_updated_by}'` : element.uid_updated_by;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.created_at = element.created_at ? `'${element.created_at}'` : element.created_at;
-              element.updated_at = element.updated_at ? `'${element.updated_at}'` : element.updated_at;
+                element.created_at = element.created_at ? `${new Date(element.created_at).toISOString()}` : element.created_at;
+                element.updated_at = element.updated_at ? `${new Date(element.updated_at).toISOString()}` : element.updated_at;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
+                element.id_type_test = element.id_type_test ? `'${element.id_type_test}'` : element.id_type_test;
+                element.quantity = element.quantity ? `'${element.quantity}'` : element.quantity;
+                element.uid_created_by = element.uid_created_by ? `'${element.uid_created_by}'` : element.uid_created_by;
+                element.uid_updated_by = element.uid_updated_by ? `'${element.uid_updated_by}'` : element.uid_updated_by;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.created_at = element.created_at ? `'${element.created_at}'` : element.created_at;
+                element.updated_at = element.updated_at ? `'${element.updated_at}'` : element.updated_at;
 
-              return "INSERT INTO t_patient_order (mrn, uid_registration, uid_test, id_type_test, quantity, uid_created_by, uid_updated_by, enabled, uid, uid_profile, uid_object, created_at, updated_at, is_bridge) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.id_type_test + ", " + element.quantity + ", " + element.uid_created_by + ", " + element.uid_updated_by + ", " + element.enabled + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_order (mrn, uid_registration, uid_test, id_type_test, quantity, uid_created_by, uid_updated_by, enabled, uid, uid_profile, uid_object, created_at, updated_at, is_bridge) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.id_type_test + ", " + element.quantity + ", " + element.uid_created_by + ", " + element.uid_updated_by + ", " + element.enabled + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ");" + "\n";
+              })
+              .join("");
 
-            let contentTPOD = tPatientOrderDetail.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPOD = tPatientOrderDetail.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
-              element.verify_date = `'${new Date(element.verify_date).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
+                element.verify_date = `'${new Date(element.verify_date).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
-              element.value = !element.value ? element.value : `'${element.value}'`;
-              element.value_string = !element.value_string ? element.value_string : `'${element.value_string}'`;
-              element.value_memo = !element.value_memo ? element.value_memo : `'${element.value_memo}'`;
-              element.uid_verify_by = !element.uid_verify_by ? element.uid_verify_by : `'${element.uid_verify_by}'`;
-              element.uid_instrument = !element.uid_instrument ? element.uid_instrument : `'${element.uid_instrument}'`;
-              element.uid_acc_by = !element.uid_acc_by ? element.uid_acc_by : `'${element.uid_acc_by}'`;
-              element.uid_action_by = !element.uid_action_by ? element.uid_action_by : `'${element.uid_action_by}'`;
-              element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
-              element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
-              element.uid = !element.uid ? element.uid : `'${element.uid}'`;
-              element.flag = !element.flag ? element.flag : `'${element.flag}'`;
-              element.uid_nilai_normal = !element.uid_nilai_normal ? element.uid_nilai_normal : `'${element.uid_nilai_normal}'`;
-              element.uid_package = !element.uid_package ? element.uid_package : `'${element.uid_package}'`;
-              element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
-              element.uid_parent = !element.uid_parent ? element.uid_parent : `'${element.uid_parent}'`;
-              element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
-              element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
+                element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
+                element.value = !element.value ? element.value : `'${element.value}'`;
+                element.value_string = !element.value_string ? element.value_string : `'${element.value_string}'`;
+                element.value_memo = !element.value_memo ? element.value_memo : `'${element.value_memo}'`;
+                element.uid_verify_by = !element.uid_verify_by ? element.uid_verify_by : `'${element.uid_verify_by}'`;
+                element.uid_instrument = !element.uid_instrument ? element.uid_instrument : `'${element.uid_instrument}'`;
+                element.uid_acc_by = !element.uid_acc_by ? element.uid_acc_by : `'${element.uid_acc_by}'`;
+                element.uid_action_by = !element.uid_action_by ? element.uid_action_by : `'${element.uid_action_by}'`;
+                element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
+                element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
+                element.uid = !element.uid ? element.uid : `'${element.uid}'`;
+                element.flag = !element.flag ? element.flag : `'${element.flag}'`;
+                element.uid_nilai_normal = !element.uid_nilai_normal ? element.uid_nilai_normal : `'${element.uid_nilai_normal}'`;
+                element.uid_package = !element.uid_package ? element.uid_package : `'${element.uid_package}'`;
+                element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
+                element.uid_parent = !element.uid_parent ? element.uid_parent : `'${element.uid_parent}'`;
+                element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
+                element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
 
-              return "INSERT INTO t_patient_order_detail (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, uid_acc_by, uid_action_by, enabled, uid_profile, uid_object, uid, flag, uid_nilai_normal, uid_package, uid_panel, uid_parent, created_at, updated_at, approve_mobile, id_order) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + " , " + element.value_string + ", " + element.value_memo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.uid_acc_by + ", " + element.uid_action_by + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.uid + ", " + element.flag + ", " + element.uid_nilai_normal + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.id_order + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_order_detail (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, uid_acc_by, uid_action_by, enabled, uid_profile, uid_object, uid, flag, uid_nilai_normal, uid_package, uid_panel, uid_parent, created_at, updated_at, approve_mobile, id_order) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + " , " + element.value_string + ", " + element.value_memo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.uid_acc_by + ", " + element.uid_action_by + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.uid + ", " + element.flag + ", " + element.uid_nilai_normal + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.id_order + ");" + "\n";
+              })
+              .join("");
 
-            let contentTPS = tPatientSample.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPS = tPatientSample.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              element.sample_num = !element.sample_num ? element.sample_num : `'${element.sample_num}'`;
-              element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
-              element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
-              element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
-              element.taken_date = !element.taken_date ? element.taken_date : `${element.taken_date}`;
-              element.type_ref = !element.type_ref ? element.type_ref : `'${element.type_ref}'`;
-              element.qty_print = !element.qty_print ? element.qty_print : `'${element.qty_print}'`;
-              element.uid_paket = !element.uid_paket ? element.uid_paket : `'${element.uid_paket}'`;
-              element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
-              element.uid = !element.uid ? element.uid : `'${element.uid}'`;
-              element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
-              element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
-              element.uid_by = !element.uid_by ? element.uid_by : `'${element.uid_by}'`;
-              element.read_by = !element.read_by ? element.read_by : `'${element.read_by}'`;
+                element.sample_num = !element.sample_num ? element.sample_num : `'${element.sample_num}'`;
+                element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
+                element.uid_registration = !element.uid_registration ? element.uid_registration : `'${element.uid_registration}'`;
+                element.uid_test = !element.uid_test ? element.uid_test : `'${element.uid_test}'`;
+                element.taken_date = !element.taken_date ? element.taken_date : `${element.taken_date}`;
+                element.type_ref = !element.type_ref ? element.type_ref : `'${element.type_ref}'`;
+                element.qty_print = !element.qty_print ? element.qty_print : `'${element.qty_print}'`;
+                element.uid_paket = !element.uid_paket ? element.uid_paket : `'${element.uid_paket}'`;
+                element.uid_panel = !element.uid_panel ? element.uid_panel : `'${element.uid_panel}'`;
+                element.uid = !element.uid ? element.uid : `'${element.uid}'`;
+                element.uid_profile = !element.uid_profile ? element.uid_profile : `'${element.uid_profile}'`;
+                element.uid_object = !element.uid_object ? element.uid_object : `'${element.uid_object}'`;
+                element.uid_by = !element.uid_by ? element.uid_by : `'${element.uid_by}'`;
+                element.read_by = !element.read_by ? element.read_by : `'${element.read_by}'`;
 
-              return "INSERT INTO t_patient_sample (sample_num, mrn, uid_registration, uid_test, taken_date, type_ref, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at, uid_by, is_read, read_by) VALUES(" + element.sample_num + ", " + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.type_ref + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.uid_by + ", " + element.is_read + ", " + element.read_by + ");" + "\n";
-            })[0];
-            contentTPS = contentTPS ? contentTPS : "";
-            let contentTPSS = tPatientSampleSpeciment.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+                return "INSERT INTO t_patient_sample (sample_num, mrn, uid_registration, uid_test, taken_date, type_ref, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at, uid_by, is_read, read_by) VALUES(" + element.sample_num + ", " + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.type_ref + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.uid_by + ", " + element.is_read + ", " + element.read_by + ");" + "\n";
+              })
+              .join("");
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+            let contentTPSS = tPatientSampleSpeciment.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.specimen = element.specimen ? `'${element.specimen}'` : element.specimen;
-              element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
-              element.taken_date = element.taken_date ? `${element.taken_date}` : element.taken_date;
-              element.uid_paket = element.uid_paket ? `'${element.uid_paket}'` : element.uid_paket;
-              element.uid_panel = element.uid_panel ? `'${element.uid_panel}'` : element.uid_panel;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              return "INSERT INTO t_patient_sample_speciment (reg_num, mrn, specimen, uid_registration, uid_test, taken_date, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.reg_num + ", " + element.mrn + ", " + element.specimen + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
-            })[0];
+                element.specimen = element.specimen ? `'${element.specimen}'` : element.specimen;
+                element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
+                element.taken_date = element.taken_date ? `${element.taken_date}` : element.taken_date;
+                element.uid_paket = element.uid_paket ? `'${element.uid_paket}'` : element.uid_paket;
+                element.uid_panel = element.uid_panel ? `'${element.uid_panel}'` : element.uid_panel;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+
+                return "INSERT INTO t_patient_sample_speciment (reg_num, mrn, specimen, uid_registration, uid_test, taken_date, qty_print, uid_paket, uid_panel, uid, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.reg_num + ", " + element.mrn + ", " + element.specimen + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.taken_date + ", " + element.qty_print + ", " + element.uid_paket + ", " + element.uid_panel + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+              })
+              .join("");
             contentTPSS = contentTPSS ? contentTPSS : "";
 
             let contentTPE = await Promise.all(
@@ -687,6 +737,7 @@ async function manual(startDate, endDate) {
                 let tPatientExaminationCritical = await client1.query("SELECT * FROM t_patient_examination_critical WHERE uid_patient_exam='" + element.uid + "'");
 
                 element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.print_date = `'${new Date(element.print_date).toISOString()}'`;
                 element.pending_date = `'${new Date(element.pending_date).toISOString()}'`;
                 element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
                 element.verify_date = `'${new Date(element.verify_date).toISOString()}'`;
@@ -729,7 +780,7 @@ async function manual(startDate, endDate) {
                   tPatientExaminationCritical.rows[0].confirm_date = tPatientExaminationCritical.rows[0].confirm_date ? `'${new Date(tPatientExaminationCritical.rows[0].confirm_date).toISOString()}'` : tPatientExaminationCritical.rows[0].confirm_date;
                   // tPatientExaminationCritical.rows[0].confirm_date = new Date(tPatientExaminationCritical.rows[0].confirm_date).toISOString();
 
-                  examContent += "INSERT INTO t_patient_examination_critical (uid_patient_exam, remark, uid_user_by, uid_user_to, uid, enabled, uid_profile, uid_object,  created_at, updated_at, confirm_date, confirm_user) VALUES(" + tPatientExaminationCritical.rows[0].uid_patient_exam + ", " + tPatientExaminationCritical.rows[0].remark + ", " + tPatientExaminationCritical.rows[0].uid_user_by + ", " + tPatientExaminationCritical.rows[0].uid_user_to + ", " + tPatientExaminationCritical.rows[0].uid + ", " + tPatientExaminationCritical.rows[0].uid_profile + ", " + tPatientExaminationCritical.rows[0].uid_object + ", " + tPatientExaminationCritical.rows[0].created_at + ", " + tPatientExaminationCritical.rows[0].uid_object + ", " + tPatientExaminationCritical.rows[0].created_at + ", " + tPatientExaminationCritical.rows[0].updated_at + ", " + tPatientExaminationCritical.rows[0].confirm_date + ", " + tPatientExaminationCritical.rows[0].confirm_user + ");\n";
+                  examContent += "INSERT INTO t_patient_examination_critical (uid_patient_exam, remark, uid_user_by, uid_user_to, uid, enabled, uid_profile, uid_object,  created_at, updated_at, confirm_date, confirm_user) VALUES(" + tPatientExaminationCritical.rows[0].uid_patient_exam + ", " + tPatientExaminationCritical.rows[0].remark + ", " + tPatientExaminationCritical.rows[0].uid_user_by + ", " + tPatientExaminationCritical.rows[0].uid_user_to + ", " + tPatientExaminationCritical.rows[0].uid + ", " + tPatientExaminationCritical.rows[0].enabled + ", " + tPatientExaminationCritical.rows[0].uid_object + ", " + tPatientExaminationCritical.rows[0].created_at + ", " + tPatientExaminationCritical.rows[0].updated_at + ", " + tPatientExaminationCritical.rows[0].confirm_date + ", " + tPatientExaminationCritical.rows[0].confirm_user + ");\n";
                 }
 
                 if (tCommentTest.rowCount > 0) {
@@ -790,118 +841,150 @@ async function manual(startDate, endDate) {
             // console.log(contentTPE.includes("t_patient_examination_critical") ? contentTPE : "");
             // contentTPE = contentTPE.replace(",INSERT", "INSERT");
             contentTPE[0] = contentTPE[0] ? contentTPE[0] : "";
-            let contentTCS = tCommentSample.rows.map((element) => {
-              // console.log("ADA", contentTPR);
-              if (!element) {
-                return "";
-              }
+            let contentTCS = tCommentSample.rows
+              .map((element) => {
+                // console.log("ADA", contentTPR);
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
-              element.status_date = `'${new Date(element.status_date).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.status_date = `'${new Date(element.status_date).toISOString()}'`;
 
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_comment_by = element.uid_comment_by ? `'${element.uid_comment_by}'` : element.uid_comment_by;
-              element.comment = element.comment ? `'${element.comment}'` : element.comment;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_comment_by = element.uid_comment_by ? `'${element.uid_comment_by}'` : element.uid_comment_by;
+                element.comment = element.comment ? `'${element.comment}'` : element.comment;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
 
-              return "INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.uid_registration + ", " + element.uid + ", " + element.comment + ", " + element.uid_comment_by + ", " + element.status + ", " + element.status_by + ", " + element.status_date + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_comment_sample (uid_registration, uid, comment, uid_comment_by, status, status_by, status_date, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.uid_registration + ", " + element.uid + ", " + element.comment + ", " + element.uid_comment_by + ", " + element.status + ", " + element.status_by + ", " + element.status_date + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+              })
+              .join("\n");
             contentTCS = contentTCS ? contentTCS : "";
 
-            let contentTPD = tPatientDiagnose.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPD = tPatientDiagnose.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
 
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.diagnose = element.diagnose ? `'${element.diagnose}'` : element.diagnose;
-              element.icd10 = element.icd10 ? `'${element.icd10}'` : element.icd10;
-              element.icd10_text = element.icd10_text ? `'${element.icd10_text}'` : element.icd10_text;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
-              element.source = element.source ? `'${element.source}'` : element.source;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.diagnose = element.diagnose ? `'${element.diagnose}'` : element.diagnose;
+                element.icd10 = element.icd10 ? `'${element.icd10}'` : element.icd10;
+                element.icd10_text = element.icd10_text ? `'${element.icd10_text}'` : element.icd10_text;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.status_by = element.status_by ? `'${element.status_by}'` : element.status_by;
+                element.source = element.source ? `'${element.source}'` : element.source;
 
-              return "INSERT INTO t_patient_diagnose (uid_registration, diagnose, icd10, icd10_text, uid, uid_profile, uid_object, created_at, updated_at, source,type) VALUES(" + element.uid_registration + ", " + element.diagnose + ", " + element.icd10 + ", " + element.icd10_text + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.source + ", " + element.type + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_diagnose (uid_registration, diagnose, icd10, icd10_text, uid, uid_profile, uid_object, created_at, updated_at, source,type) VALUES(" + element.uid_registration + ", " + element.diagnose + ", " + element.icd10 + ", " + element.icd10_text + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.source + ", " + element.type + ");" + "\n";
+              })
+              .join("\n");
             contentTPD = contentTPD ? contentTPD : "";
 
-            let contentTPEM = tPatientExamMicro.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPEM = tPatientExamMicro.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
-              element.verified_date = `'${new Date(element.verified_date).toISOString()}'`;
-              // console.log("ada", contentTPR);
-              // console.log(JSON.stringify(element.microscopic_value));
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.microscopic_value = element.microscopic_value ? `'${JSON.stringify(element.microscopic_value)}'` : element.microscopic_value;
-              element.bacteria_result = element.bacteria_result ? `'${JSON.stringify(element.bacteria_result)}'` : element.bacteria_result;
-              element.antibiotic_test_result = element.antibiotic_test_result ? `'${JSON.stringify(element.antibiotic_test_result)}'` : element.antibiotic_test_result;
-              element.uid_t_patient_exam = element.uid_t_patient_exam ? `'${element.uid_t_patient_exam}'` : element.uid_t_patient_exam;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
-              element.uid_registration = element.uid_registration ? `${element.uid_registration}` : element.uid_registration;
-              element.sample_num = element.sample_num ? `'${element.sample_num}'` : element.sample_num;
-              element.taken_by = element.taken_by ? `'${element.taken_by}'` : element.taken_by;
-              element.verified_by = element.verified_by ? `'${element.verified_by}'` : element.verified_by;
-              element.approved_by = element.approved_by ? `'${element.approved_by}'` : element.approved_by;
-              element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
-              element.keterangan = element.keterangan ? `'${element.keterangan}'` : element.keterangan;
-              element.isEdited = element.isEdited ? `'${element.isEdited}'` : element.isEdited;
-              element.jaringan = element.jaringan ? `'${element.jaringan}'` : element.jaringan;
-              element.request_type = element.request_type ? `'${element.request_type}'` : element.request_type;
-              element.speciment_type = element.speciment_type ? `'${element.speciment_type}'` : element.speciment_type;
-              element.id = element.id ? `'${element.id}'` : element.id;
-              // element.isVerify = element.isVerify ? `'${element.isVerify}'` : element.isVerify;
-              element.additional = element.additional ? `'${JSON.stringify(element.additional)}'` : element.additional;
+                element.taken_date = `'${new Date(element.taken_date).toISOString()}'`;
+                element.verified_date = `'${new Date(element.verified_date).toISOString()}'`;
+                // console.log("ada", contentTPR);
+                // console.log(JSON.stringify(element.microscopic_value));
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.microscopic_value = element.microscopic_value ? `'${JSON.stringify(element.microscopic_value)}'` : element.microscopic_value;
+                element.bacteria_result = element.bacteria_result ? `'${JSON.stringify(element.bacteria_result)}'` : element.bacteria_result;
+                element.antibiotic_test_result = element.antibiotic_test_result ? `'${JSON.stringify(element.antibiotic_test_result)}'` : element.antibiotic_test_result;
+                element.uid_t_patient_exam = element.uid_t_patient_exam ? `'${element.uid_t_patient_exam}'` : element.uid_t_patient_exam;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid_registration = element.uid_registration ? `${element.uid_registration}` : element.uid_registration;
+                element.sample_num = element.sample_num ? `'${element.sample_num}'` : element.sample_num;
+                element.taken_by = element.taken_by ? `'${element.taken_by}'` : element.taken_by;
+                element.verified_by = element.verified_by ? `'${element.verified_by}'` : element.verified_by;
+                element.approved_by = element.approved_by ? `'${element.approved_by}'` : element.approved_by;
+                element.uid_test = element.uid_test ? `'${element.uid_test}'` : element.uid_test;
+                element.keterangan = element.keterangan ? `'${element.keterangan}'` : element.keterangan;
+                element.isEdited = element.isEdited ? `'${element.isEdited}'` : element.isEdited;
+                element.jaringan = element.jaringan ? `'${element.jaringan}'` : element.jaringan;
+                element.request_type = element.request_type ? `'${element.request_type}'` : element.request_type;
+                element.speciment_type = element.speciment_type ? `'${element.speciment_type}'` : element.speciment_type;
+                element.id = element.id ? `'${element.id}'` : element.id;
+                // element.isVerify = element.isVerify ? `'${element.isVerify}'` : element.isVerify;
+                element.additional = element.additional ? `'${JSON.stringify(element.additional)}'` : element.additional;
 
-              return "INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(" + element.id + ", " + element.microscopic_value + ", " + element.growth + ", " + element.bacteria_result + ", " + element.antibiotic_test_result + ", " + element.uid_t_patient_exam + ", " + element.mrn + ", " + element.uid_registration + ", " + element.sample_num + ", " + element.taken_date + ", " + element.taken_by + ", " + element.verified_date + ", " + element.verified_by + ", " + element.approved_date + ", " + element.approved_by + ", " + element.uid_test + ", " + element.keterangan + ", " + element.jaringan + ", " + element.request_type + ", " + element.speciment_type + ", " + element.additional + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_exam_microbiology (id, microscopic_value, growth, bacteria_result, antibiotic_test_result, uid_t_patient_exam, mrn, uid_registration, sample_num, taken_date, taken_by, verified_date, verified_by, approved_date, approved_by, uid_test, keterangan, jaringan, request_type, speciment_type, additional) VALUES(" + element.id + ", " + element.microscopic_value + ", " + element.growth + ", " + element.bacteria_result + ", " + element.antibiotic_test_result + ", " + element.uid_t_patient_exam + ", " + element.mrn + ", " + element.uid_registration + ", " + element.sample_num + ", " + element.taken_date + ", " + element.taken_by + ", " + element.verified_date + ", " + element.verified_by + ", " + element.approved_date + ", " + element.approved_by + ", " + element.uid_test + ", " + element.keterangan + ", " + element.jaringan + ", " + element.request_type + ", " + element.speciment_type + ", " + element.additional + ");" + "\n";
+              })
+              .join("\n");
             contentTPEM = contentTPEM ? contentTPEM : "";
-            let contentTPP = tPatientPayment.rows.map((element) => {
-              if (!element) {
-                return "";
-              }
+            let contentTPP = tPatientPayment.rows
+              .map((element) => {
+                if (!element) {
+                  return "";
+                }
 
-              element.created_at = `'${new Date(element.created_at).toISOString()}'`;
-              element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
-              element.payment_date = `'${new Date(element.payment_date).toISOString()}'`;
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.payment_date = `'${new Date(element.payment_date).toISOString()}'`;
 
-              element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
-              element.amount_of_bill = element.amount_of_bill ? `'${element.amount_of_bill}'` : element.amount_of_bill;
-              element.amount_of_claim = element.amount_of_claim ? `'${element.amount_of_claim}'` : element.amount_of_claim;
-              element.amount_of_payment = element.amount_of_payment ? `'${element.amount_of_payment}'` : element.amount_of_payment;
-              element.amount_of_discount = element.amount_of_discount ? `'${element.amount_of_discount}'` : element.amount_of_discount;
-              element.amount_of_tax = element.amount_of_tax ? `'${element.amount_of_tax}'` : element.amount_of_tax;
-              element.remaining_pay = element.remaining_pay ? `'${element.remaining_pay}'` : element.remaining_pay;
-              element.uid_billing = element.uid_billing ? `'${element.uid_billing}'` : element.uid_billing;
-              element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
-              element.uid_payment_method = element.uid_payment_method ? `'${element.uid_payment_method}'` : element.uid_payment_method;
-              element.card_number = element.card_number ? `'${element.card_number}'` : element.card_number;
-              element.uid = element.uid ? `'${element.uid}'` : element.uid;
-              element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
-              element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
-              element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
+                element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
+                element.amount_of_bill = element.amount_of_bill ? `'${element.amount_of_bill}'` : element.amount_of_bill;
+                element.amount_of_claim = element.amount_of_claim ? `'${element.amount_of_claim}'` : element.amount_of_claim;
+                element.amount_of_payment = element.amount_of_payment ? `'${element.amount_of_payment}'` : element.amount_of_payment;
+                element.amount_of_discount = element.amount_of_discount ? `'${element.amount_of_discount}'` : element.amount_of_discount;
+                element.amount_of_tax = element.amount_of_tax ? `'${element.amount_of_tax}'` : element.amount_of_tax;
+                element.remaining_pay = element.remaining_pay ? `'${element.remaining_pay}'` : element.remaining_pay;
+                element.uid_billing = element.uid_billing ? `'${element.uid_billing}'` : element.uid_billing;
+                element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
+                element.uid_payment_method = element.uid_payment_method ? `'${element.uid_payment_method}'` : element.uid_payment_method;
+                element.card_number = element.card_number ? `'${element.card_number}'` : element.card_number;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+                element.uid_claim = element.uid_claim ? `'${element.uid_claim}'` : element.uid_claim;
 
-              element.discount = element.discount ? `'${element.discount}'` : element.discount;
-              element.tax = element.tax ? `'${element.tax}'` : element.tax;
-              element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
-              element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.discount = element.discount ? `'${element.discount}'` : element.discount;
+                element.tax = element.tax ? `'${element.tax}'` : element.tax;
+                element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
 
-              return "INSERT INTO t_patient_payment (mrn, uid_registration, reg_num, amount_of_bill, amount_of_claim, amount_of_payment, amount_of_discount, amount_of_tax, remaining_pay, uid_billing, uid_claim, payment_date, uid_payment_method, card_number, uid, uid_profile, uid_object, created_at, updated_at, is_bridge, discount, tax) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.reg_num + ", " + element.amount_of_bill + ", " + element.amount_of_claim + ", " + element.amount_of_payment + ", " + element.amount_of_discount + ", " + element.amount_of_tax + ", " + element.remaining_pay + ", " + element.uid_billing + ", " + element.uid_claim + ", " + element.payment_date + ", " + element.uid_payment_method + ", " + element.card_number + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ", " + element.discount + ", " + element.tax + ");" + "\n";
-            })[0];
+                return "INSERT INTO t_patient_payment (mrn, uid_registration, reg_num, amount_of_bill, amount_of_claim, amount_of_payment, amount_of_discount, amount_of_tax, remaining_pay, uid_billing, uid_claim, payment_date, uid_payment_method, card_number, uid, uid_profile, uid_object, created_at, updated_at, is_bridge, discount, tax) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.reg_num + ", " + element.amount_of_bill + ", " + element.amount_of_claim + ", " + element.amount_of_payment + ", " + element.amount_of_discount + ", " + element.amount_of_tax + ", " + element.remaining_pay + ", " + element.uid_billing + ", " + element.uid_claim + ", " + element.payment_date + ", " + element.uid_payment_method + ", " + element.card_number + ", " + element.uid + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ", " + element.is_bridge + ", " + element.discount + ", " + element.tax + ");" + "\n";
+              })
+              .join("\n");
+
+            let contentTHAS = tHistoryApproveSample.rows
+              .map((element) => {
+                // console.log("ADA", contentTPR);
+                if (!element) {
+                  return "";
+                }
+
+                element.created_at = `'${new Date(element.created_at).toISOString()}'`;
+                element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
+                element.acc_date = `'${new Date(element.acc_date).toISOString()}'`;
+
+                element.mrn = element.mrn ? `'${element.mrn}'` : element.mrn;
+                element.uid = element.uid ? `'${element.uid}'` : element.uid;
+                element.reg_num = element.reg_num ? `'${element.reg_num}'` : element.reg_num;
+                element.uid_acc_by = element.uid_acc_by ? `'${element.uid_acc_by}'` : element.uid_acc_by;
+                element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
+
+                return "INSERT INTO t_history_approve_sample (mrn, reg_num, acc_date, uid, uid_acc_by, enabled, uid_profile, uid_object, created_at, updated_at) VALUES(" + element.mrn + ", " + element.reg_num + ", " + element.acc_date + ", " + element.uid + ", " + element.uid_acc_by + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + ", " + element.created_at + ", " + element.updated_at + ");" + "\n";
+              })
+              .join("\n");
+            contentTHAS = contentTHAS ? contentTHAS : "";
             contentTPP = contentTPP ? contentTPP : "";
             contentTPE = contentTPE.join("");
-            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP;
+
+            contentTPS = contentTPS ? contentTPS : "";
+            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS;
             let newRegNum = element.reg_num.replace(/'/g, "");
             fs.writeFile("./app/manual/" + newRegNum + ".sql", contentFull, (err) => {
               console.log("Writing SQL Manual");
