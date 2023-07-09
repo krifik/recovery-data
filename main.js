@@ -624,7 +624,7 @@ async function manual(startDate, endDate) {
             // element.fast_note = !element.fast_note ? element.fast_note : `'${element.fast_note}'`;
             element.mrn = !element.mrn ? element.mrn : `'${element.mrn}'`;
             element.guarantor = !element.guarantor ? element.guarantor : `'${element.guarantor}'`;
-            element.members_number = !element.members_number ? element.members_number : `'${element.members_number}'`;
+            element.members_number = !element.members_number ? null : `'${element.members_number}'`;
             element.referral_type = !element.referral_type ? element.referral_type : `'${element.referral_type}'`;
             element.uid_ward = !element.uid_ward ? element.uid_ward : `'${element.uid_ward}'`;
             element.uid_class = !element.uid_class ? element.uid_class : `'${element.uid_class}'`;
@@ -1036,7 +1036,7 @@ async function manual(startDate, endDate) {
             contentTPE = contentTPE.join("");
 
             contentTPS = contentTPS ? contentTPS : "";
-            let contentFull = contentEBR + "\n" + contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS + "\n" + contentTP;
+            let contentFull = contentTPR + "\n" + contentTPO + "\n" + contentTPOD + "\n" + contentTPS + "\n" + contentTPSS + "\n" + contentTPE + "\n" + contentTCS + "\n" + contentTPD + "\n" + contentTPEM + "\n" + contentTPP + "\n" + contentTHAS + "\n" + contentTP;
             let newRegNum = element.reg_num.replace(/'/g, "");
             fs.writeFile("./app/manual/" + newRegNum + ".sql", contentFull, (err) => {
               console.log("Writing SQL Manual");
