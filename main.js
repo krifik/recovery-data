@@ -148,7 +148,7 @@ async function bridging(startDate, endDate) {
             // tPatientRegistrationItem.fast_note = !tPatientRegistrationItem.fast_note ? tPatientRegistrationItem.fast_note : `'${tPatientRegistrationItem.fast_note}'`;
             tPatientRegistrationItem.mrn = !tPatientRegistrationItem.mrn ? tPatientRegistrationItem.mrn : `'${tPatientRegistrationItem.mrn}'`;
             tPatientRegistrationItem.guarantor = !tPatientRegistrationItem.guarantor ? tPatientRegistrationItem.guarantor : `'${tPatientRegistrationItem.guarantor}'`;
-            tPatientRegistrationItem.members_number = !tPatientRegistrationItem.members_number ? tPatientRegistrationItem.members_number : `'${tPatientRegistrationItem.members_number}'`;
+            tPatientRegistrationItem.members_number = !tPatientRegistrationItem.members_number ? null : `'${tPatientRegistrationItem.members_number}'`;
             tPatientRegistrationItem.referral_type = !tPatientRegistrationItem.referral_type ? tPatientRegistrationItem.referral_type : `'${tPatientRegistrationItem.referral_type}'`;
             tPatientRegistrationItem.uid_ward = !tPatientRegistrationItem.uid_ward ? tPatientRegistrationItem.uid_ward : `'${tPatientRegistrationItem.uid_ward}'`;
             tPatientRegistrationItem.uid_class = !tPatientRegistrationItem.uid_class ? tPatientRegistrationItem.uid_class : `'${tPatientRegistrationItem.uid_class}'`;
