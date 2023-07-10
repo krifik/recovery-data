@@ -429,7 +429,7 @@ async function bridging(startDate, endDate) {
                   tHistoryVerify.rows[0].value = tHistoryVerify.rows[0].value ? `'${tHistoryVerify.rows[0].value}'` : tHistoryVerify.rows[0].value;
                   tHistoryVerify.rows[0].value_memo = tHistoryVerify.rows[0].value_memo ? `'${tHistoryVerify.rows[0].value_memo}'` : tHistoryVerify.rows[0].value_memo;
                   tHistoryVerify.rows[0].value_string = tHistoryVerify.rows[0].value_string ? `'${tHistoryVerify.rows[0].value_string}'` : tHistoryVerify.rows[0].value_string;
-                  tHistoryVerify.rows[0].reason = tHistoryVerify.rows[0].reason ? `'${tHistoryVerify.rows[0].reason}'` : "-";
+                  tHistoryVerify.rows[0].reason = tHistoryVerify.rows[0].reason ? `'${tHistoryVerify.rows[0].reason}'` : `'${"-"}'`;
                   tHistoryVerify.rows[0].flag = tHistoryVerify.rows[0].flag ? `'${tHistoryVerify.rows[0].flag}'` : tHistoryVerify.rows[0].flag;
 
                   tHistoryVerify.rows[0].verify_date = `'${new Date(tHistoryVerify.rows[0].verify_date).toISOString()}'`;
@@ -913,7 +913,7 @@ async function manual(startDate, endDate) {
                   tHistoryVerify.rows[0].value = tHistoryVerify.rows[0].value ? `'${tHistoryVerify.rows[0].value}'` : tHistoryVerify.rows[0].value;
                   tHistoryVerify.rows[0].value_memo = tHistoryVerify.rows[0].value_memo ? `'${tHistoryVerify.rows[0].value_memo}'` : tHistoryVerify.rows[0].value_memo;
                   tHistoryVerify.rows[0].value_string = tHistoryVerify.rows[0].value_string ? `'${tHistoryVerify.rows[0].value_string}'` : tHistoryVerify.rows[0].value_string;
-                  tHistoryVerify.rows[0].reason = tHistoryVerify.rows[0].reason ? `'${tHistoryVerify.rows[0].reason}'` : "-";
+                  tHistoryVerify.rows[0].reason = tHistoryVerify.rows[0].reason ? `'${tHistoryVerify.rows[0].reason}'` : `'${"-"}'`;
                   tHistoryVerify.rows[0].flag = tHistoryVerify.rows[0].flag ? `'${tHistoryVerify.rows[0].flag}'` : tHistoryVerify.rows[0].flag;
 
                   tHistoryVerify.rows[0].verify_date = `'${new Date(tHistoryVerify.rows[0].verify_date).toISOString()}'`;
