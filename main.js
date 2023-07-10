@@ -90,7 +90,7 @@ async function bridging(startDate, endDate) {
                 tPatient.rows[0].name = tPatient.rows[0].name ? `'${tPatient.rows[0].name}'` : tPatient.rows[0].name;
                 tPatient.rows[0].gender = tPatient.rows[0].gender ? `'${tPatient.rows[0].gender}'` : tPatient.rows[0].gender;
                 tPatient.rows[0].address = tPatient.rows[0].address ? `'${tPatient.rows[0].address}'` : null;
-                tPatient.rows[0].phone = tPatient.rows[0].phone ? `'${tPatient.rows[0].phone}'` : tPatient.rows[0].phone;
+                tPatient.rows[0].phone = tPatient.rows[0].phone ? `'${tPatient.rows[0].phone}'` : null;
                 tPatient.rows[0].email = tPatient.rows[0].email ? `'${tPatient.rows[0].email}'` : null;
                 tPatient.rows[0].pob = tPatient.rows[0].pob ? `'${tPatient.rows[0].pob}'` : null;
                 tPatient.rows[0].uid = tPatient.rows[0].uid ? `'${tPatient.rows[0].uid}'` : tPatient.rows[0].uid;
@@ -611,7 +611,7 @@ async function manual(startDate, endDate) {
               tPatient.rows[0].name = tPatient.rows[0].name ? `'${tPatient.rows[0].name}'` : tPatient.rows[0].name;
               tPatient.rows[0].gender = tPatient.rows[0].gender ? `'${tPatient.rows[0].gender}'` : tPatient.rows[0].gender;
               tPatient.rows[0].address = tPatient.rows[0].address ? `'${tPatient.rows[0].address}'` : null;
-              tPatient.rows[0].phone = tPatient.rows[0].phone ? `'${tPatient.rows[0].phone}'` : tPatient.rows[0].phone;
+              tPatient.rows[0].phone = tPatient.rows[0].phone ? `'${tPatient.rows[0].phone}'` : null;
               tPatient.rows[0].email = tPatient.rows[0].email ? `'${tPatient.rows[0].email}'` : null;
               tPatient.rows[0].pob = tPatient.rows[0].pob ? `'${tPatient.rows[0].pob}'` : null;
               tPatient.rows[0].uid = tPatient.rows[0].uid ? `'${tPatient.rows[0].uid}'` : tPatient.rows[0].uid;
