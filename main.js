@@ -477,8 +477,8 @@ async function bridging(startDate, endDate) {
 
                 element.uid_registration = element.uid_registration ? `'${element.uid_registration}'` : element.uid_registration;
                 element.diagnose = element.diagnose ? `'${element.diagnose}'` : element.diagnose;
-                element.icd10 = element.icd10 ? `'${element.icd10}'` : element.icd10;
-                element.icd10_text = element.icd10_text ? `'${element.icd10_text}'` : element.icd10_text;
+                element.icd10 = element.icd10 ? `'${element.icd10}'` : null;
+                element.icd10_text = element.icd10_text ? `'${element.icd10_text}'` : null;
                 element.uid_profile = element.uid_profile ? `'${element.uid_profile}'` : element.uid_profile;
                 element.uid = element.uid ? `'${element.uid}'` : element.uid;
                 element.uid_object = element.uid_object ? `'${element.uid_object}'` : element.uid_object;
