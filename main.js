@@ -98,7 +98,8 @@ async function bridging(startDate, endDate) {
                 tPatient.rows[0].uid_profile = tPatient.rows[0].uid_profile ? `'${tPatient.rows[0].uid_profile}'` : tPatient.rows[0].uid_profile;
                 tPatient.rows[0].uid_object = tPatient.rows[0].uid_object ? `'${tPatient.rows[0].uid_object}'` : tPatient.rows[0].uid_object;
                 tPatient.rows[0].nik = tPatient.rows[0].nik ? `'${tPatient.rows[0].nik}'` : null;
-                contentTP = "INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES(" + tPatient.rows[0].mrn + ", " + tPatient.rows[0].name + ", " + tPatient.rows[0].gender + ", " + tPatient.rows[0].dob + ", " + tPatient.rows[0].address + ", " + tPatient.rows[0].phone + ", " + tPatient.rows[0].email + ", " + tPatient.rows[0].membership_date + ", " + tPatient.rows[0].pob + ", " + tPatient.rows[0].uid + ", " + tPatient.rows[0].enabled + " , " + tPatient.rows[0].source + ", " + tPatient.rows[0].uid_profile + ", " + tPatient.rows[0].uid_object + ", " + tPatient.rows[0].nik + ");";
+                tPatient.rows[0].title = tPatient.rows[0].title ? `'${tPatient.rows[0].title}'` : tPatient.rows[0].gender === "M" ? "Mr." : "Mrs. ";
+                contentTP = "INSERT INTO t_patient (mrn, name, title, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES(" + tPatient.rows[0].mrn + ", " + tPatient.rows[0].name + ", " + tPatient.rows[0].title + ", " + tPatient.rows[0].gender + ", " + tPatient.rows[0].dob + ", " + tPatient.rows[0].address + ", " + tPatient.rows[0].phone + ", " + tPatient.rows[0].email + ", " + tPatient.rows[0].membership_date + ", " + tPatient.rows[0].pob + ", " + tPatient.rows[0].uid + ", " + tPatient.rows[0].enabled + " , " + tPatient.rows[0].source + ", " + tPatient.rows[0].uid_profile + ", " + tPatient.rows[0].uid_object + ", " + tPatient.rows[0].nik + ");";
               }
             }
 
@@ -357,7 +358,7 @@ async function bridging(startDate, endDate) {
                 element.flag = element.flag ? `'${element.flag}'` : element.flag;
                 element.uid_parent = element.uid_parent ? `'${element.uid_parent}'` : element.uid_parent;
                 element.uid_nilai_normal = element.uid_nilai_normal ? `'${element.uid_nilai_normal}'` : element.uid_nilai_normal;
-                element.role_text = element.role_text ? `'${element.role_text}'` : element.role_text;
+                element.role_text = element.role_text ? `'${element.role_text}'` : null;
                 element.sign = element.sign ? `'${element.sign}'` : element.sign;
                 element.print_date = `'${new Date(element.print_date).toISOString()}'`;
 
@@ -619,8 +620,9 @@ async function manual(startDate, endDate) {
               tPatient.rows[0].uid_profile = tPatient.rows[0].uid_profile ? `'${tPatient.rows[0].uid_profile}'` : tPatient.rows[0].uid_profile;
               tPatient.rows[0].uid_object = tPatient.rows[0].uid_object ? `'${tPatient.rows[0].uid_object}'` : tPatient.rows[0].uid_object;
               tPatient.rows[0].nik = tPatient.rows[0].nik ? `'${tPatient.rows[0].nik}'` : null;
+              tPatient.rows[0].title = tPatient.rows[0].title ? `'${tPatient.rows[0].title}'` : tPatient.rows[0].gender === "M" ? "Mr." : "Mrs. ";
 
-              contentTP = "INSERT INTO t_patient (mrn, name, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES(" + tPatient.rows[0].mrn + ", " + tPatient.rows[0].name + ", " + tPatient.rows[0].gender + ", " + tPatient.rows[0].dob + ", " + tPatient.rows[0].address + ", " + tPatient.rows[0].phone + ", " + tPatient.rows[0].email + ", " + tPatient.rows[0].membership_date + ", " + tPatient.rows[0].pob + ", " + tPatient.rows[0].uid + ", " + tPatient.rows[0].enabled + " , " + tPatient.rows[0].source + ", " + tPatient.rows[0].uid_profile + ", " + tPatient.rows[0].uid_object + ", " + tPatient.rows[0].nik + ");";
+              contentTP = "INSERT INTO t_patient (mrn, name, title, gender, dob, address, phone, email, membership_date, pob, uid, enabled, source, uid_profile, uid_object, nik) VALUES(" + tPatient.rows[0].mrn + ", " + tPatient.rows[0].name + ", " + tPatient.rows[0].title + ", " + tPatient.rows[0].gender + ", " + tPatient.rows[0].dob + ", " + tPatient.rows[0].address + ", " + tPatient.rows[0].phone + ", " + tPatient.rows[0].email + ", " + tPatient.rows[0].membership_date + ", " + tPatient.rows[0].pob + ", " + tPatient.rows[0].uid + ", " + tPatient.rows[0].enabled + " , " + tPatient.rows[0].source + ", " + tPatient.rows[0].uid_profile + ", " + tPatient.rows[0].uid_object + ", " + tPatient.rows[0].nik + ");";
             }
             let tPatientSample = await client1.query("SELECT * FROM t_patient_sample WHERE uid_registration='" + element.uid + "'");
             let tPatientSampleSpeciment = await client1.query("SELECT * FROM t_patient_sample_speciment WHERE uid_registration='" + element.uid + "'");
@@ -839,7 +841,7 @@ async function manual(startDate, endDate) {
                 element.flag = element.flag ? `'${element.flag}'` : element.flag;
                 element.uid_parent = element.uid_parent ? `'${element.uid_parent}'` : element.uid_parent;
                 element.uid_nilai_normal = element.uid_nilai_normal ? `'${element.uid_nilai_normal}'` : element.uid_nilai_normal;
-                element.role_text = element.role_text ? `'${element.role_text}'` : element.role_text;
+                element.role_text = element.role_text ? `'${element.role_text}'` : null;
                 element.sign = element.sign ? `'${element.sign}'` : element.sign;
 
                 examContent = "INSERT INTO t_patient_examination (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, print_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, flag, pending_date, pending_by, uid_acc_by, uid_created_by, uid_action_by, uid_package, uid_panel, uid_parent, uid_nilai_normal, uid, enabled, uid_profile, uid_object, created_at, updated_at, approve_mobile, uid_rolebase, role_text, sign, id_order, is_duplo) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + ", " + element.value_string + ", " + element.value_memo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.print_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.flag + ", " + element.pending_date + ", " + element.pending_by + ", " + element.uid_acc_by + ", " + element.uid_created_by + ", " + element.uid_action_by + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.uid_nilai_normal + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + "," + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.uid_rolebase + "," + element.role_text + "," + element.sign + ", " + element.id_order + "," + element.is_duplo + ");\n";
