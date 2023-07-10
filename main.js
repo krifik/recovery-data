@@ -2,6 +2,7 @@ require("dotenv").config();
 // const express = require("express");
 const Client = require("pg").Client;
 const format = require("pg-format");
+const he = require("he");
 
 const fs = require("fs");
 let dbConfig1;
@@ -361,7 +362,7 @@ async function bridging(startDate, endDate) {
                 element.role_text = element.role_text ? `'${element.role_text}'` : null;
                 element.sign = element.sign ? `'${element.sign}'` : element.sign;
                 element.print_date = `'${new Date(element.print_date).toISOString()}'`;
-                const escapedValueMemo = element.value_memo ? element.value_memo.replace(/'/g, "'") : null;
+                const escapedValueMemo = element.value_memo ? `'${he.escape(element.value_memo)}'` : null;
                 examContent = "INSERT INTO t_patient_examination (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, print_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, flag, pending_date, pending_by, uid_acc_by, uid_created_by, uid_action_by, uid_package, uid_panel, uid_parent, uid_nilai_normal, uid, enabled, uid_profile, uid_object, created_at, updated_at, approve_mobile, uid_rolebase, role_text, sign, id_order, is_duplo) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + ", " + element.value_string + ", " + escapedValueMemo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.print_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.flag + ", " + element.pending_date + ", " + element.pending_by + ", " + element.uid_acc_by + ", " + element.uid_created_by + ", " + element.uid_action_by + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.uid_nilai_normal + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + "," + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.uid_rolebase + "," + element.role_text + "," + element.sign + ", " + element.id_order + "," + element.is_duplo + ");\n";
 
                 if (tPatientExaminationCritical.rowCount > 0) {
@@ -415,7 +416,7 @@ async function bridging(startDate, endDate) {
                   tHistoryApprove.rows[0].acc_date = `'${new Date(tHistoryApprove.rows[0].acc_date).toISOString()}'`;
                   tHistoryApprove.rows[0].created_at = `'${new Date(tHistoryApprove.rows[0].created_at).toISOString()}'`;
                   tHistoryApprove.rows[0].updated_at = `'${new Date(tHistoryApprove.rows[0].updated_at).toISOString()}'`;
-                  const escapedValueMemo = tHistoryApprove.rows[0].value_memo ? tHistoryApprove.rows[0].value_memo.replace(/'/g, "'") : null;
+                  const escapedValueMemo = tHistoryApprove.rows[0].value_memo ? `'${he.escape(tHistoryApprove.rows[0].value_memo)}'` : null;
                   examContent += "INSERT INTO t_history_approve (uid_examination, uid_test, value, value_string, is_acc, acc_date, uid_acc_by, flag, value_memo, enabled, uid_profile, uid_object, uid, created_at, updated_at, reason) VALUES(" + tHistoryApprove.rows[0].uid_examination + ", " + tHistoryApprove.rows[0].uid_test + ", " + tHistoryApprove.rows[0].value + ", " + tHistoryApprove.rows[0].value_string + ", " + tHistoryApprove.rows[0].is_acc + ", " + tHistoryApprove.rows[0].acc_date + ", " + tHistoryApprove.rows[0].uid_acc_by + ", '" + tHistoryApprove.rows[0].flag + "', " + escapedValueMemo + ", " + tHistoryApprove.rows[0].enabled + ", " + tHistoryApprove.rows[0].uid_profile + ", " + tHistoryApprove.rows[0].uid_object + ", " + tHistoryApprove.rows[0].uid + ", " + tHistoryApprove.rows[0].created_at + ", " + tHistoryApprove.rows[0].updated_at + ", " + tHistoryApprove.rows[0].reason + ");\n";
                 }
                 if (tHistoryVerify.rowCount > 0) {
@@ -435,7 +436,7 @@ async function bridging(startDate, endDate) {
                   tHistoryVerify.rows[0].created_at = `'${new Date(tHistoryVerify.rows[0].created_at).toISOString()}'`;
                   tHistoryVerify.rows[0].updated_at = `'${new Date(tHistoryVerify.rows[0].updated_at).toISOString()}'`;
 
-                  const escapedValueMemo = tHistoryVerify.rows[0].value_memo ? tHistoryVerify.rows[0].value_memo.replace(/'/g, "'") : null;
+                  const escapedValueMemo = tHistoryVerify.rows[0].value_memo ? `'${he.escape(tHistoryVerify.rows[0].value_memo)}'` : null;
                   examContent += "INSERT INTO t_history_verify (uid_examination, uid_test, value, value_string, is_verify, verify_date, uid_verify_by, flag, value_memo, enabled, uid_profile, uid_object, uid, created_at, updated_at, reason) VALUES(" + tHistoryVerify.rows[0].uid_examination + ", " + tHistoryVerify.rows[0].uid_test + ", " + tHistoryVerify.rows[0].value + ", " + tHistoryVerify.rows[0].value_string + ", " + tHistoryVerify.rows[0].is_verify + ", " + tHistoryVerify.rows[0].verify_date + ", " + tHistoryVerify.rows[0].uid_verify_by + ", " + tHistoryVerify.rows[0].flag + ", " + escapedValueMemo + ", " + tHistoryVerify.rows[0].enabled + ", " + tHistoryVerify.rows[0].uid_profile + ", " + tHistoryVerify.rows[0].uid_object + ", " + tHistoryVerify.rows[0].uid + ", " + tHistoryVerify.rows[0].created_at + ", " + tHistoryVerify.rows[0].updated_at + ", " + tHistoryVerify.rows[0].reason + ");\n";
                 }
                 // console.log(examContent);
@@ -846,7 +847,7 @@ async function manual(startDate, endDate) {
                 element.uid_nilai_normal = element.uid_nilai_normal ? `'${element.uid_nilai_normal}'` : element.uid_nilai_normal;
                 element.role_text = element.role_text ? `'${element.role_text}'` : null;
                 element.sign = element.sign ? `'${element.sign}'` : element.sign;
-                const escapedValueMemo = element.value_memo ? element.value_memo.replace(/'/g, "'") : null;
+                const escapedValueMemo = element.value_memo ? `'${he.escape(element.value_memo)}'` : null;
                 examContent = "INSERT INTO t_patient_examination (mrn, uid_registration, uid_test, value, value_string, value_memo, is_verify, verify_date, print_date, uid_verify_by, uid_instrument, is_acc, acc_date, is_edit, flag, pending_date, pending_by, uid_acc_by, uid_created_by, uid_action_by, uid_package, uid_panel, uid_parent, uid_nilai_normal, uid, enabled, uid_profile, uid_object, created_at, updated_at, approve_mobile, uid_rolebase, role_text, sign, id_order, is_duplo) VALUES(" + element.mrn + ", " + element.uid_registration + ", " + element.uid_test + ", " + element.value + ", " + element.value_string + ", " + escapedValueMemo + ", " + element.is_verify + ", " + element.verify_date + ", " + element.print_date + ", " + element.uid_verify_by + ", " + element.uid_instrument + ", " + element.is_acc + ", " + element.acc_date + ", " + element.is_edit + ", " + element.flag + ", " + element.pending_date + ", " + element.pending_by + ", " + element.uid_acc_by + ", " + element.uid_created_by + ", " + element.uid_action_by + ", " + element.uid_package + ", " + element.uid_panel + ", " + element.uid_parent + ", " + element.uid_nilai_normal + ", " + element.uid + ", " + element.enabled + ", " + element.uid_profile + ", " + element.uid_object + "," + element.created_at + ", " + element.updated_at + ", " + element.approve_mobile + ", " + element.uid_rolebase + "," + element.role_text + "," + element.sign + ", " + element.id_order + "," + element.is_duplo + ");\n";
 
                 if (tPatientExaminationCritical.rowCount > 0) {
@@ -899,7 +900,7 @@ async function manual(startDate, endDate) {
                   tHistoryApprove.rows[0].acc_date = `'${new Date(tHistoryApprove.rows[0].acc_date).toISOString()}'`;
                   tHistoryApprove.rows[0].created_at = `'${new Date(tHistoryApprove.rows[0].created_at).toISOString()}'`;
                   tHistoryApprove.rows[0].updated_at = `'${new Date(tHistoryApprove.rows[0].updated_at).toISOString()}'`;
-                  const escapedValueMemo = tHistoryApprove.rows[0].value_memo ? tHistoryApprove.rows[0].value_memo.replace(/'/g, "'") : null;
+                  const escapedValueMemo = tHistoryApprove.rows[0].value_memo ? `'${he.escape(tHistoryApprove.rows[0].value_memo)}'` : null;
                   examContent += "INSERT INTO t_history_approve (uid_examination, uid_test, value, value_string, is_acc, acc_date, uid_acc_by, flag, value_memo, enabled, uid_profile, uid_object, uid, created_at, updated_at, reason) VALUES(" + tHistoryApprove.rows[0].uid_examination + ", " + tHistoryApprove.rows[0].uid_test + ", " + tHistoryApprove.rows[0].value + ", " + tHistoryApprove.rows[0].value_string + ", " + tHistoryApprove.rows[0].is_acc + ", " + tHistoryApprove.rows[0].acc_date + ", " + tHistoryApprove.rows[0].uid_acc_by + ", '" + tHistoryApprove.rows[0].flag + "', " + escapedValueMemo + ", " + tHistoryApprove.rows[0].enabled + ", " + tHistoryApprove.rows[0].uid_profile + ", " + tHistoryApprove.rows[0].uid_object + ", " + tHistoryApprove.rows[0].uid + ", " + tHistoryApprove.rows[0].created_at + ", " + tHistoryApprove.rows[0].updated_at + ", " + tHistoryApprove.rows[0].reason + ");\n";
                 }
                 if (tHistoryVerify.rowCount > 0) {
@@ -918,7 +919,7 @@ async function manual(startDate, endDate) {
                   tHistoryVerify.rows[0].verify_date = `'${new Date(tHistoryVerify.rows[0].verify_date).toISOString()}'`;
                   tHistoryVerify.rows[0].created_at = `'${new Date(tHistoryVerify.rows[0].created_at).toISOString()}'`;
                   tHistoryVerify.rows[0].updated_at = `'${new Date(tHistoryVerify.rows[0].updated_at).toISOString()}'`;
-                  const escapedValueMemo = tHistoryVerify.rows[0].value_memo ? tHistoryVerify.rows[0].value_memo.replace(/'/g, "'") : null;
+                  const escapedValueMemo = tHistoryVerify.rows[0].value_memo ? `'${he.escape(tHistoryVerify.rows[0].value_memo)}'` : null;
                   examContent += "INSERT INTO t_history_verify (uid_examination, uid_test, value, value_string, is_verify, verify_date, uid_verify_by, flag, value_memo, enabled, uid_profile, uid_object, uid, created_at, updated_at, reason) VALUES(" + tHistoryVerify.rows[0].uid_examination + ", " + tHistoryVerify.rows[0].uid_test + ", " + tHistoryVerify.rows[0].value + ", " + tHistoryVerify.rows[0].value_string + ", " + tHistoryVerify.rows[0].is_verify + ", " + tHistoryVerify.rows[0].verify_date + ", " + tHistoryVerify.rows[0].uid_verify_by + ", " + tHistoryVerify.rows[0].flag + ", " + escapedValueMemo + ", " + tHistoryVerify.rows[0].enabled + ", " + tHistoryVerify.rows[0].uid_profile + ", " + tHistoryVerify.rows[0].uid_object + ", " + tHistoryVerify.rows[0].uid + ", " + tHistoryVerify.rows[0].created_at + ", " + tHistoryVerify.rows[0].updated_at + ", " + tHistoryVerify.rows[0].reason + ");\n";
                 }
                 // console.log(examContent);
