@@ -138,7 +138,7 @@ async function bridging(startDate, endDate) {
 
             tPatientRegistrationItem.created_at = `'${new Date(tPatientRegistrationItem.created_at).toISOString()}'`;
             tPatientRegistrationItem.updated_at = `'${new Date(tPatientRegistrationItem.updated_at).toISOString()}'`;
-            tPatientRegistrationItem.cancelation_date = `'${new Date(tPatientRegistrationItem.cancelation_date).toISOString()}'`;
+            tPatientRegistrationItem.cancelation_date = null;
             tPatientRegistrationItem.registration_date = `'${new Date(tPatientRegistrationItem.registration_date).toISOString()}'`;
 
             tPatientRegistrationItem.patient_type = !tPatientRegistrationItem.patient_type ? tPatientRegistrationItem.patient_type : `'${tPatientRegistrationItem.patient_type}'`;
@@ -640,7 +640,7 @@ async function manual(startDate, endDate) {
 
             element.created_at = `'${new Date(element.created_at).toISOString()}'`;
             element.updated_at = `'${new Date(element.updated_at).toISOString()}'`;
-            element.cancelation_date = `'${new Date(element.cancelation_date).toISOString()}'`;
+            element.cancelation_date = null;
             element.registration_date = `'${new Date(element.registration_date).toISOString()}'`;
 
             element.patient_type = !element.patient_type ? element.patient_type : `'${element.patient_type}'`;
